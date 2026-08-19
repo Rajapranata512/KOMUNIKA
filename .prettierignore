@@ -1,0 +1,10 @@
+node_modules
+.next
+dist
+coverage
+pnpm-lock.yaml
+*.snap
+
+AGENTS.md
+PRD.md
+DESIGN.md

@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlatformRole {
+  PLATFORM_ADMIN
+}
+
+enum JournalRole {
+  AUTHOR
+  REVIEWER
+  COPYEDITOR
+  PRODUCTION_EDITOR
+  SECTION_EDITOR
+  EDITOR_IN_CHIEF
+  JOURNAL_MANAGER
+}
+
+enum JournalStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ReviewModel {
+  SINGLE_ANONYMOUS
+  DOUBLE_ANONYMOUS
+}
+
+enum JournalTemplateKind {
+  AUTHOR_GUIDELINES
+  MANUSCRIPT_TEMPLATE
+  COPYRIGHT_NOTICE
+}
+
+model User {
+  id              String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  email           String        @unique
+  passwordHash    String
+  platformRole    PlatformRole?
+  fullName        String?
+  affiliation     String?
+  countryCode     String?
+  expertise       String[]      @default([])
+  orcidId         String?
+  locale          String        @default("id-ID")
+  timezone        String        @default("Asia/Jakarta")
+  emailVerifiedAt DateTime?     @db.Timestamptz
+  disabledAt      DateTime?     @db.Timestamptz
+  createdAt       DateTime      @default(now()) @db.Timestamptz
+  updatedAt       DateTime      @updatedAt @db.Timestamptz
+  sessions        Session[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+  journalMemberships JournalMembership[]
+  journalsCreated Journal[] @relation("JournalCreator")
+  auditEvents     AuditEvent[]
+}
+
+model Journal {
+  id                String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  slug              String              @unique
+  title             String
+  abbreviation      String
+  description       String
+  scope             String
+  contactEmail      String
+  printIssn         String?
+  electronicIssn    String?
+  primaryLanguage   String              @default("id")
+  reviewModel       ReviewModel         @default(DOUBLE_ANONYMOUS)
+  status            JournalStatus       @default(DRAFT)
+  submissionsOpen   Boolean             @default(false)
+  createdById       String              @db.Uuid
+  createdAt         DateTime            @default(now()) @db.Timestamptz
+  updatedAt         DateTime            @updatedAt @db.Timestamptz
+  createdBy         User                @relation("JournalCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  memberships       JournalMembership[]
+  sections          JournalSection[]
+  articleTypes      ArticleType[]
+  checklistItems    SubmissionChecklistItem[]
+  declarations      JournalDeclaration[]
+  templates         JournalTemplate[]
+
+  @@index([status, title])
+}
+
+model JournalMembership {
+  id        String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId String      @db.Uuid
+  userId    String      @db.Uuid
+  role      JournalRole
+  createdAt DateTime    @default(now()) @db.Timestamptz
+  journal   Journal     @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([journalId, userId, role])
+  @@index([userId, journalId])
+  @@index([journalId, role])
+}
+
+model JournalSection {
+  id          String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId   String        @db.Uuid
+  slug        String
+  title       String
+  description String        @default("")
+  sortOrder   Int           @default(0)
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now()) @db.Timestamptz
+  updatedAt   DateTime      @updatedAt @db.Timestamptz
+  journal     Journal       @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  articleTypes ArticleType[]
+
+  @@unique([journalId, slug])
+  @@index([journalId, sortOrder])
+}
+
+model ArticleType {
+  id                  String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId           String          @db.Uuid
+  sectionId           String?         @db.Uuid
+  slug                String
+  title               String
+  description         String          @default("")
+  peerReviewRequired  Boolean         @default(true)
+  sortOrder           Int             @default(0)
+  isActive            Boolean         @default(true)
+  createdAt           DateTime        @default(now()) @db.Timestamptz
+  updatedAt           DateTime        @updatedAt @db.Timestamptz
+  journal             Journal         @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  section             JournalSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  @@unique([journalId, slug])
+  @@index([journalId, sortOrder])
+  @@index([sectionId])
+}
+
+model SubmissionChecklistItem {
+  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId  String   @db.Uuid
+  label      String
+  isRequired Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+  journal    Journal  @relation(fields: [journalId], references: [id], onDelete: Cascade)
+
+  @@index([journalId, sortOrder])
+}
+
+model JournalDeclaration {
+  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId  String   @db.Uuid
+  code       String
+  version    Int
+  title      String
+  body       String
+  isRequired Boolean  @default(true)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  journal    Journal  @relation(fields: [journalId], references: [id], onDelete: Cascade)
+
+  @@unique([journalId, code, version])
+  @@index([journalId, code, isActive])
+}
+
+model JournalTemplate {
+  id        String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId String              @db.Uuid
+  kind      JournalTemplateKind
+  slug      String
+  title     String
+  body      String
+  sortOrder Int                 @default(0)
+  isActive  Boolean             @default(true)
+  createdAt DateTime            @default(now()) @db.Timestamptz
+  updatedAt DateTime            @updatedAt @db.Timestamptz
+  journal   Journal             @relation(fields: [journalId], references: [id], onDelete: Cascade)
+
+  @@unique([journalId, slug])
+  @@index([journalId, kind, sortOrder])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz
+  usedAt    DateTime? @db.Timestamptz
+  createdAt DateTime  @default(now()) @db.Timestamptz
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz
+  usedAt    DateTime? @db.Timestamptz
+  createdAt DateTime  @default(now()) @db.Timestamptz
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model Session {
+  id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique
+  csrfHash   String
+  expiresAt  DateTime  @db.Timestamptz
+  lastSeenAt DateTime  @default(now()) @db.Timestamptz
+  revokedAt  DateTime? @db.Timestamptz
+  createdAt  DateTime  @default(now()) @db.Timestamptz
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model AuditEvent {
+  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  actorId    String?  @db.Uuid
+  action     String
+  targetType String
+  targetId   String?  @db.Uuid
+  requestId  String
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId, createdAt])
+}

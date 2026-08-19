@@ -1,0 +1,32 @@
+{
+  "name": "@aksara/database",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma validate \u0026\u0026 tsc -p tsconfig.json --noEmit",
+    "typecheck": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma validate \u0026\u0026 tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:integration": "vitest run --passWithNoTests",
+    "test:e2e": "vitest run --passWithNoTests",
+    "test:a11y": "vitest run --passWithNoTests",
+    "test:visual": "vitest run --passWithNoTests",
+    "db:validate": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma validate",
+    "db:migrate:test": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script",
+    "bootstrap:admin": "tsx src/bootstrap-admin.ts",
+    "db:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.12.0",
+    "argon2": "^0.44.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "prisma": "^6.12.0",
+    "vitest": "^3.2.0",
+    "tsx": "^4.20.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  },
+  "exports": "./dist/index.js"
+}

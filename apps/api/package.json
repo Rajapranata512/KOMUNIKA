@@ -1,0 +1,37 @@
+{
+  "name": "@aksara/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src/",
+    "test:integration": "dotenv -e ../../.env -- vitest run test/auth.integration.test.ts test/journal.integration.test.ts test/profile.integration.test.ts",
+    "test:e2e": "vitest run --passWithNoTests",
+    "test:a11y": "vitest run --passWithNoTests",
+    "test:visual": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@aksara/config": "workspace:*",
+    "@aksara/domain": "workspace:*",
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/platform-express": "^11.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.0",
+    "@aksara/database": "workspace:*",
+    "argon2": "^0.44.0",
+    "zod": "^4.0.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "@types/express": "^5.0.0",
+    "dotenv-cli": "^10.0.0"
+  }
+}
