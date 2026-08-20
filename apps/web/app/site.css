@@ -24,7 +24,6 @@ a {
   transform: translateY(0);
 }
 
-.site-header,
 footer {
   display: flex;
   align-items: center;
@@ -35,8 +34,19 @@ footer {
 }
 
 .site-header {
+  border-bottom: 3px solid var(--color-accent-decorative);
+  background: var(--color-surface);
+  box-shadow: 0 3px 0 var(--color-brand);
+}
+
+.site-header-inner {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--color-border);
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px 24px;
 }
 
 .site-header nav,
@@ -45,16 +55,36 @@ footer {
   gap: 24px;
 }
 
-.wordmark,
+.site-header nav a {
+  padding: 8px 0 6px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-brand);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.site-header nav a:hover,
+.site-header nav a:focus-visible {
+  border-bottom-color: var(--color-accent-decorative);
+}
+
 h1,
 h2 {
   font-family: var(--font-serif), serif;
 }
 
-.wordmark {
-  font-size: 1.5rem;
-  font-weight: 600;
+.brand-lockup {
+  display: inline-flex;
+  flex: 0 1 290px;
+  align-items: center;
   text-decoration: none;
+}
+
+.brand-logo {
+  width: min(100%, 290px);
+  height: auto;
 }
 
 main {
@@ -137,30 +167,49 @@ h1 {
 
 footer {
   flex-wrap: wrap;
-  border-top: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-brand);
   color: var(--color-ink-muted);
   font-size: 0.875rem;
 }
 
-footer span {
-  margin-right: auto;
+.publisher-values {
+  color: var(--color-brand);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 @media (max-width: 640px) {
-  .site-header {
+  .site-header-inner {
+    flex-direction: column;
     align-items: flex-start;
+    padding-right: 16px;
+    padding-left: 16px;
   }
 
   .site-header nav {
-    flex-direction: column;
-    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 4px 14px;
+  }
+
+  .brand-lockup {
+    flex-basis: auto;
+  }
+
+  .brand-logo {
+    width: 220px;
+  }
+
+  .site-header nav a {
+    font-size: 0.8125rem;
   }
 
   main {
     padding: 48px 16px 64px;
   }
 
-  .site-header,
   footer {
     padding-right: 16px;
     padding-left: 16px;
@@ -177,6 +226,13 @@ footer span {
   padding: 40px;
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface);
+}
+
+.auth-brand {
+  max-width: 280px;
+  margin-bottom: 32px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--color-accent-decorative);
 }
 
 .auth-panel h1,

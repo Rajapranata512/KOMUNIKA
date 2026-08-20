@@ -3,6 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["APP_ENV", "APP_BASE_URL", "API_BASE_URL", "EMAIL_DELIVERY_MODE"],
       "outputs": [".next/**", "dist/**", "!.next/cache/**"]
     },
     "dev": {

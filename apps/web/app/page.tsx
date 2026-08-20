@@ -5,13 +5,13 @@ export default function HomePage() {
     <PublicPage>
       <main id="main-content">
         <section className="masthead" aria-labelledby="platform-heading">
-          <p className="eyebrow">Infrastruktur penerbitan ilmiah</p>
+          <p className="eyebrow">Aksara Nusa Global Publishing</p>
           <h1 id="platform-heading">
             Kelola penerbitan jurnal dengan proses yang dapat ditelusuri.
           </h1>
           <p className="lede">
-            Aksara membantu penulis, reviewer, dan editor menjalankan alur publikasi ilmiah secara
-            tertib tanpa menggantikan pertimbangan editorial manusia.
+            ANG Publishing membantu penulis, reviewer, dan editor menjalankan alur publikasi ilmiah
+            secara tertib tanpa menggantikan pertimbangan editorial manusia.
           </p>
           <div className="actions">
             <a className="primary-action" href="/journals">

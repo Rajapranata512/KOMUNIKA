@@ -1,3 +1,5 @@
+import { BrandMark } from '../../components/public-chrome';
+
 interface RegisterPageProps {
   searchParams: Promise<{ error?: string }>;
 }
@@ -7,7 +9,10 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   return (
     <main id={'main-content'} className={'auth-shell'}>
       <section className={'auth-panel'} aria-labelledby={'register-heading'}>
-        <p className={'eyebrow'}>Akun Aksara</p>
+        <div className={'auth-brand'}>
+          <BrandMark priority />
+        </div>
+        <p className={'eyebrow'}>Akun ANG Publishing</p>
         <h1 id={'register-heading'}>Buat akun</h1>
         <p className={'lede'}>Daftar dengan email aktif untuk mengelola naskah Anda.</p>
         {error ? (

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate --schema prisma/schema.prisma",
     "build": "tsc -p tsconfig.json",
     "lint": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma validate \u0026\u0026 tsc -p tsconfig.json --noEmit",
     "typecheck": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma validate \u0026\u0026 tsc -p tsconfig.json --noEmit",

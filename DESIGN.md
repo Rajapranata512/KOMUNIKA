@@ -1,9 +1,9 @@
-# DESIGN.md — Aksara Journal Platform Design System and UX Specification
+# DESIGN.md — Aksara Nusa Global Publishing Design System and UX Specification
 
 - **Document status:** Approved design baseline
 - **Applies to:** Public publishing site, author workspace, reviewer workspace, editorial workspace, and administration
-- **Design objective:** Credible scholarly publishing with modern operational clarity
-- **Last updated:** 2026-08-03
+- **Design objective:** Credible scholarly publishing with modern operational clarity and a restrained ANG publisher identity
+- **Last updated:** 2026-08-20
 
 ---
 
@@ -93,14 +93,15 @@ Contrast, focus, keyboard access, error recovery, and readable content are found
 
 ### 4.1 Concept
 
-**“Modern editorial desk.”**
+**“Modern editorial desk with ANG publisher identity.”**
 
 The visual reference is a high-quality scholarly journal combined with a precise editorial workflow system:
 
 - paper-like reading surfaces;
 - dark ink typography;
 - thin editorial rules;
-- modest use of deep blue as an action and trust color;
+- ANG navy as the primary trust and action color;
+- restrained gold rules and accents inspired by the approved publisher lockup;
 - warm neutral backgrounds rather than sterile pure white everywhere;
 - compact operational density without becoming cramped.
 
@@ -109,6 +110,13 @@ The visual reference is a high-quality scholarly journal combined with a precise
 The project must not visually imitate Scopus, SINTA, OJS, Elsevier, Springer Nature, Wiley, Taylor & Francis, or another publisher.
 
 It may follow familiar scholarly usability conventions, but brand marks, color systems, component appearance, and page composition must remain original.
+
+### 4.3 Publisher identity
+
+- The canonical public name is **Aksara Nusa Global Publishing**; **ANG Publishing** is the approved compact label.
+- Use the horizontal ANG lockup on public chrome and identity entry points. Keep its aspect ratio, whitespace, navy, and gold intact.
+- Gold is decorative or used for large/high-contrast accents. Use the darker accessible gold token for text and controls.
+- The publisher address and legal contact details must remain configurable and must not be copied from a visual reference without owner confirmation.
 
 ---
 
@@ -122,12 +130,12 @@ Define tokens once in `packages/ui/tokens` and expose them as CSS custom propert
 
 ```css
 :root {
-  --color-canvas: #f5f3ee;
+  --color-canvas: #f7f6f2;
   --color-surface: #ffffff;
   --color-surface-subtle: #faf9f6;
   --color-surface-inset: #efede7;
 
-  --color-ink: #17202a;
+  --color-ink: #101b2a;
   --color-ink-muted: #58616b;
   --color-ink-subtle: #7a828a;
   --color-ink-inverse: #ffffff;
@@ -135,12 +143,13 @@ Define tokens once in `packages/ui/tokens` and expose them as CSS custom propert
   --color-border: #d9d6ce;
   --color-border-strong: #b7b2a8;
 
-  --color-brand: #173f5f;
-  --color-brand-hover: #0f324d;
-  --color-brand-soft: #e8eff4;
+  --color-brand: #09264a;
+  --color-brand-hover: #061b35;
+  --color-brand-soft: #eaf0f6;
 
-  --color-accent: #9a6b2f;
-  --color-accent-soft: #f3eadc;
+  --color-accent: #8a6200;
+  --color-accent-decorative: #d9a520;
+  --color-accent-soft: #f7edd0;
 
   --color-success: #276749;
   --color-success-soft: #e7f3ec;
@@ -173,6 +182,7 @@ Load through `next/font` where available. Use a system fallback stack. Do not bu
 
 ### Usage
 
+- Publisher lockup: approved ANG image asset, never reconstructed with interface fonts
 - Journal wordmark: serif, medium or semibold
 - Article and issue title: serif
 - Long-form abstract or article text: serif or carefully tested reading style
@@ -302,7 +312,7 @@ Do not hide critical functionality on mobile. Recompose it.
 
 Contents:
 
-- publisher or journal wordmark;
+- ANG publisher lockup or journal wordmark;
 - Journals;
 - Current Issue;
 - Archives;
@@ -1091,5 +1101,7 @@ Do not build the entire component library before implementing real vertical slic
 ---
 
 ## 20. Changelog
+
+- **2026-08-20:** Adopted the Aksara Nusa Global Publishing lockup and accessible ANG navy-gold theme for public chrome and identity entry points, including responsive and brand-integrity rules.
 
 - **2026-08-03:** Initial visual direction, anti-template rules, tokens, layouts, navigation, page specifications, component boundaries, responsive behavior, accessibility, and design QA criteria.

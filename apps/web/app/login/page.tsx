@@ -1,3 +1,5 @@
+import { BrandMark } from '../../components/public-chrome';
+
 interface LoginPageProps {
   searchParams: Promise<{ error?: string; verified?: string; reset?: string }>;
 }
@@ -7,7 +9,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main id="main-content" className="auth-shell">
       <section className="auth-panel" aria-labelledby="login-heading">
-        <p className="eyebrow">Akun Aksara</p>
+        <div className="auth-brand">
+          <BrandMark priority />
+        </div>
+        <p className="eyebrow">Akun ANG Publishing</p>
         <h1 id="login-heading">Masuk</h1>
         <p className="lede">Gunakan email dan password akun Anda.</p>
         {error ? (

@@ -2,8 +2,8 @@ import { PublicPage } from '../../components/public-chrome';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
-  title: 'Daftar Jurnal | Aksara',
-  description: 'Jelajahi jurnal ilmiah yang dikelola melalui Aksara Journal Platform.',
+  title: 'Daftar Jurnal',
+  description: 'Jelajahi jurnal ilmiah yang dikelola oleh Aksara Nusa Global Publishing.',
 };
 
 const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3001/api/v1';

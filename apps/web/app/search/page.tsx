@@ -1,8 +1,8 @@
 import { PublicPage } from '../../components/public-chrome';
 
 export const metadata = {
-  title: 'Pencarian Artikel | Aksara',
-  description: 'Cari artikel ilmiah yang telah dipublikasikan melalui Aksara Journal Platform.',
+  title: 'Pencarian Artikel',
+  description: 'Cari artikel ilmiah yang dipublikasikan oleh Aksara Nusa Global Publishing.',
 };
 
 interface SearchPageProps {
