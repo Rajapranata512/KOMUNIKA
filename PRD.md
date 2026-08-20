@@ -5,7 +5,7 @@
 - **Product type:** Multi-journal scholarly submission, peer-review, editorial, and publishing platform
 - **Initial market:** Universities, research institutions, associations, and independent scholarly journal publishers in Indonesia
 - **Default language:** Indonesian, with English-ready architecture
-- **Last updated:** 2026-08-19
+- **Last updated:** 2026-08-20
 
 ---
 
@@ -1432,8 +1432,8 @@ This tracker records verified implementation state. Requirements remain authorit
 
 | Phase | Status | Verified scope | Remaining dependency |
 | --- | --- | --- | --- |
-| Phase 0 — Foundation | In progress | Monorepo, workspace scripts, shared domain and design-token packages, NestJS and Next.js foundations, Prisma schema boundary, PostgreSQL 18 native local service, Docker Compose definition, CI workflow, unit and database integration tests, typecheck, lint, schema validation, and production build | Docker image downloads remain unavailable, so Redis, MinIO, and Mailpit local services are not running; E2E, accessibility, and visual test suites are not implemented |
-| Phase 1 — Identity and journal configuration | In progress | One canonical login for general and platform-admin accounts with role-based routing; registration, verification, reset, and session administration; Argon2id passwords and hashed opaque tokens; profile fields for name, affiliation, country, expertise, user-entered unverified ORCID, locale, and timezone; profile ownership, CSRF, validation, and audit; database-backed journal creation and configuration; published/draft visibility; multi-role journal memberships; centralized permission policy; server-side journal-scoped management checks; cross-journal isolation tests; database-backed public journal directory and detail page; journal sections, article types, submission checklists, versioned declarations, and templates with tenant-scoped configuration-editing UI; deterministic PostgreSQL migrations; verified local admin/public smoke tests; unit tests, integration tests, typecheck, migration validation, and production build pass | Real transactional-email queue delivery, MFA for privileged users, and complete E2E/security tests remain |
+| Phase 0 — Foundation | In progress | Monorepo, workspace scripts, shared domain and design-token packages, NestJS and Next.js foundations, Prisma schema boundary, PostgreSQL 18 native local service, Docker Compose definition, CI workflow, unit and database integration tests, typecheck, lint, schema validation, production build, and a verified Vercel production frontend deployment | Redis, MinIO, and Mailpit local services are not running; the production API/database and `API_BASE_URL` are not provisioned, so data-backed Vercel routes are not operational; E2E, accessibility, and visual test suites are not implemented |
+| Phase 1 — Identity and journal configuration | In progress | One canonical login for general and platform-admin accounts with role-based routing; registration, verification, reset, and session administration; Argon2id passwords and hashed opaque tokens; profile fields for name, affiliation, country, expertise, user-entered unverified ORCID, locale, and timezone; profile ownership, CSRF, validation, and audit; database-backed journal creation and configuration; published/draft visibility; multi-role journal memberships; centralized permission policy; server-side journal-scoped management checks; cross-journal isolation tests; database-backed public journal directory and detail page; journal sections, article types, submission checklists, versioned declarations, and templates with tenant-scoped configuration-editing UI; BullMQ producers for verification and reset email, centralized idempotent job contracts, SMTP worker templates, bounded exponential retry, failed-job retention, structured delivery logs, and delivery audit state; deterministic PostgreSQL migrations; verified local admin/public smoke tests; unit tests, integration tests, typecheck, migration validation, and production build pass | Live Redis-to-SMTP delivery remains blocked until Redis and Mailpit or production equivalents are available; MFA for privileged users and complete E2E/security tests remain |
 | Phase 2 — Author submission | Not started | Submission state vocabulary and basic transition tests exist | Complete Phase 1, then implement the author submission vertical slice |
 | Phase 3 — Editorial screening | Not started | No functional implementation | Complete Phase 2 |
 | Phase 4 — Peer review | Not started | No functional implementation | Complete Phase 3 |
@@ -1589,6 +1589,8 @@ Until approved, use neutral configurable placeholders and do not fabricate legal
 ---
 
 ## 32. Changelog
+
+- **2026-08-20:** Added audited BullMQ verification/reset email producers, an SMTP worker with idempotency, bounded retry and failed-state retention, safe templates and tests; deployed the frontend to Vercel production, while recording that public API/database configuration and live queue-to-SMTP validation remain blocked.
 
 - **2026-08-19:** Added tenant-scoped journal sections, article types, submission checklists, versioned declarations, and templates, plus the journal configuration-editing UI, with cross-journal isolation tests and a deterministic migration.
 

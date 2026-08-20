@@ -6,10 +6,11 @@ import { AuthService } from './auth.service.js';
 import { LoginRateLimitService } from './rate-limit.service.js';
 import { ProfileController } from './profile.controller.js';
 import { ProfileService } from './profile.service.js';
+import { TransactionalEmailQueue } from '../notifications/transactional-email.queue.js';
 
 @Module({
   controllers: [AuthController, AdminController, ProfileController],
-  providers: [AuthService, LoginRateLimitService, ProfileService],
+  providers: [AuthService, LoginRateLimitService, ProfileService, TransactionalEmailQueue],
   exports: [AuthService],
 })
 export class IdentityModule {}

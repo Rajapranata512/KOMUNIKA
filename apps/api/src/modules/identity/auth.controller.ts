@@ -91,7 +91,7 @@ export class AuthController {
       );
     return {
       user: { email: result.user.email, emailVerified: false },
-      verificationDelivery: 'pending',
+      verificationDelivery: result.deliveryState,
       ...(result.developmentToken ? { developmentToken: result.developmentToken } : {}),
     };
   }

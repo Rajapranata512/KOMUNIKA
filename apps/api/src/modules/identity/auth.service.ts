@@ -1,10 +1,15 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { database } from '@aksara/database';
+import type { TransactionalEmailEvent } from '@aksara/domain';
 import { hash, verify } from 'argon2';
 
 import type { AuthenticatedAdmin, AuthenticatedUser } from './identity.types.js';
+import {
+  TransactionalEmailQueue,
+  type EmailDeliveryState,
+} from '../notifications/transactional-email.queue.js';
 
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const VERIFICATION_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -18,6 +23,8 @@ function digest(value: string): string {
 @Injectable()
 export class AuthService {
   private readonly dummyHash = hash('not-a-real-password', PASSWORD_OPTIONS);
+
+  constructor(@Optional() private readonly emails?: TransactionalEmailQueue) {}
 
   async register(emailInput: string, password: string, requestId: string) {
     const email = emailInput.trim().toLowerCase();
@@ -46,7 +53,18 @@ export class AuthService {
       });
       return created;
     });
-    return { user, developmentToken: process.env.APP_ENV === 'local' ? token : undefined };
+    const deliveryState = await this.queueIdentityEmail(
+      'identity.verify-email',
+      user.id,
+      user.email,
+      token,
+      requestId,
+    );
+    return {
+      user,
+      deliveryState,
+      developmentToken: process.env.APP_ENV === 'local' ? token : undefined,
+    };
   }
 
   async verifyEmail(token: string, requestId: string) {
@@ -95,7 +113,46 @@ export class AuthService {
         },
       }),
     ]);
-    return { developmentToken: process.env.APP_ENV === 'local' ? token : undefined };
+    const deliveryState = await this.queueIdentityEmail(
+      'identity.password-reset',
+      user.id,
+      user.email,
+      token,
+      requestId,
+    );
+    return {
+      deliveryState,
+      developmentToken: process.env.APP_ENV === 'local' ? token : undefined,
+    };
+  }
+
+  private async queueIdentityEmail(
+    event: TransactionalEmailEvent,
+    userId: string,
+    recipient: string,
+    token: string,
+    requestId: string,
+  ): Promise<EmailDeliveryState> {
+    const deliveryState = this.emails
+      ? await this.emails.enqueue(
+          { event, recipient, token, userId, requestId, requestedAt: new Date().toISOString() },
+          digest(token),
+        )
+      : process.env.APP_ENV === 'local'
+        ? 'development-token'
+        : 'disabled';
+
+    await database.auditEvent.create({
+      data: {
+        actorId: userId,
+        action: 'notification.transactional_email_requested',
+        targetType: 'User',
+        targetId: userId,
+        requestId,
+        metadata: { event, deliveryState },
+      },
+    });
+    return deliveryState;
   }
 
   async resetPassword(token: string, password: string, requestId: string) {

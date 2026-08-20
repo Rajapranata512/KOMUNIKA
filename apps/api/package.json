@@ -15,23 +15,24 @@
   },
   "dependencies": {
     "@aksara/config": "workspace:*",
+    "@aksara/database": "workspace:*",
     "@aksara/domain": "workspace:*",
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
     "@nestjs/platform-express": "^11.1.0",
+    "argon2": "^0.44.0",
+    "bullmq": "^5.56.0",
+    "express": "^5.1.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.0",
-    "@aksara/database": "workspace:*",
-    "argon2": "^0.44.0",
-    "zod": "^4.0.0",
-    "express": "^5.1.0"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
-    "@types/node": "^24.0.0",
-    "typescript": "^5.9.0",
-    "vitest": "^3.2.0",
     "@types/express": "^5.0.0",
-    "dotenv-cli": "^10.0.0"
+    "@types/node": "^24.0.0",
+    "dotenv-cli": "^10.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
   }
 }
