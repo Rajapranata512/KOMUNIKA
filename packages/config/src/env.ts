@@ -36,6 +36,7 @@ export const environmentSchema = z.object({
   ANTIVIRUS_PORT: z.coerce.number().int().positive(),
   OTEL_EXPORTER_ENDPOINT: z.url().optional().or(z.literal('')),
   ERROR_TRACKING_DSN: z.url().optional().or(z.literal('')),
+  SENTRY_DSN: z.url().optional().or(z.literal('')),
   ORCID_CLIENT_ID: z.string().optional(),
   ORCID_CLIENT_SECRET: z.string().optional(),
   CROSSREF_USERNAME: z.string().optional(),
@@ -135,7 +136,11 @@ const deploymentEnvironmentSchema = environmentSchema.superRefine((environment, 
       message: 'Private and public object-storage buckets must be distinct.',
     });
   }
-  if (!environment.OTEL_EXPORTER_ENDPOINT && !environment.ERROR_TRACKING_DSN) {
+  if (
+    !environment.OTEL_EXPORTER_ENDPOINT &&
+    !environment.ERROR_TRACKING_DSN &&
+    !environment.SENTRY_DSN
+  ) {
     context.addIssue({
       code: 'custom',
       path: ['OTEL_EXPORTER_ENDPOINT'],

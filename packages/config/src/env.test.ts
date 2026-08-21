@@ -29,6 +29,7 @@ const deploymentEnvironment = {
   ANTIVIRUS_PORT: '3310',
   OTEL_EXPORTER_ENDPOINT: 'https://telemetry.example.test',
   ERROR_TRACKING_DSN: '',
+  SENTRY_DSN: '',
 };
 
 describe('environment validation', () => {
@@ -40,6 +41,16 @@ describe('environment validation', () => {
     const parsed = parseDeploymentEnvironment(deploymentEnvironment);
     expect(parsed.SMTP_SECURE).toBe(true);
     expect(parsed.APP_ENV).toBe('staging');
+  });
+
+  it('accepts the Sentry Marketplace DSN as the error-tracking destination', () => {
+    expect(
+      parseDeploymentEnvironment({
+        ...deploymentEnvironment,
+        OTEL_EXPORTER_ENDPOINT: '',
+        SENTRY_DSN: 'https://public@example.ingest.de.sentry.io/1',
+      }).SENTRY_DSN,
+    ).toContain('sentry.io');
   });
 
   it('rejects loopback, plaintext, disabled-worker deployment settings', () => {
@@ -57,6 +68,7 @@ describe('environment validation', () => {
         SMTP_USER: '',
         SMTP_PASSWORD: '',
         OTEL_EXPORTER_ENDPOINT: '',
+        SENTRY_DSN: '',
       }),
     ).toThrow();
   });
