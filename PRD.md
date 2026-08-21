@@ -1594,6 +1594,8 @@ Until approved, use neutral configurable placeholders and do not fabricate legal
 
 ## 32. Changelog
 
+- **2026-08-22:** Reviewed official staging-provider constraints and stopped before billing-capable actions: Cloudflare R2 is S3-compatible and has included monthly usage but requires an owner checkout/subscription that can bill overages, Render does not offer Free instances for persistent background workers, and Resend requires an owner-controlled verified sending domain; no storage, SMTP, worker, or paid resource was created.
+
 - **2026-08-22:** After direct owner acceptance of the Upstash terms, provisioned the isolated `aksara-staging-redis` Preview resource on the Free plan with auto-upgrade, production pack, and eviction disabled; redeployed the protected staging API; and passed TLS BullMQ connectivity, temporary-job round-trip and cleanup, liveness, database readiness, public route, admin login/authorization, anonymous denial, and web regression smoke checks without creating a charge.
 
 - **2026-08-22:** Confirmed the Sentry Developer telemetry plan is priced at zero, but stopped before installation because its Marketplace addendum, privacy policy, and service terms require direct owner acceptance; no telemetry resource or charge was created.
