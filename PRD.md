@@ -1594,6 +1594,8 @@ Until approved, use neutral configurable placeholders and do not fabricate legal
 
 ## 32. Changelog
 
+- **2026-08-22:** Confirmed the Sentry Developer telemetry plan is priced at zero, but stopped before installation because its Marketplace addendum, privacy policy, and service terms require direct owner acceptance; no telemetry resource or charge was created.
+
 - **2026-08-22:** Provisioned a separate no-cost Singapore Neon Preview database, applied all 16 migrations, deployed protected API and web staging aliases, added an exact-origin server-only Deployment Protection adapter, passed staging liveness, database-readiness, public-route, admin-login, privileged-authorization, and anonymous-denial smoke checks, and retained Phase 0 as blocked pending no-cost Redis terms acceptance plus storage, SMTP, worker/ClamAV, telemetry, and production backup/PITR evidence.
 
 - **2026-08-22:** With explicit owner approval, rotated and re-enabled the audited production platform administrator using the locally retained bootstrap credentials; verified real admin login, platform-admin authorization, and CSRF-protected logout against the public API, and confirmed the five-attempt/15-minute production login rate limit without weakening it.
