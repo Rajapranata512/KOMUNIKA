@@ -536,6 +536,14 @@ The journal cover may appear, but it should not dominate usability.
 - Support accessible filtering.
 - Do not use an infinite masonry grid.
 
+### Search and discovery
+
+- Keep the primary keyword field visually dominant.
+- Present journal, section, article-type, issue, and year filters as a compact labeled fieldset.
+- Store active search and filter state in the URL so results can be shared and restored.
+- Use journal-aware option labels when slugs or names may repeat across tenants.
+- Show a truthful empty state when no approved public article matches; never substitute demo records.
+
 ## 9.4 Issue page
 
 - Issue identity at top
@@ -719,6 +727,7 @@ Do not bury the current round, manuscript version, or due dates.
 ## 9.12 Issue builder
 
 - issue metadata form;
+- optional JPEG or PNG cover upload with visible quarantine, scan, and public-approval states;
 - unpublished accepted-article pool;
 - ordered table of contents;
 - drag-and-drop only as an enhancement, with keyboard controls and explicit move buttons;
@@ -1101,6 +1110,8 @@ Do not build the entire component library before implementing real vertical slic
 ---
 
 ## 20. Changelog
+
+- **2026-08-20:** Added URL-preserved faceted public-search behavior, truthful database-backed empty states, and the scanned/approved optional issue-cover workflow and rendering convention.
 
 - **2026-08-20:** Adopted the Aksara Nusa Global Publishing lockup and accessible ANG navy-gold theme for public chrome and identity entry points, including responsive and brand-integrity rules.
 

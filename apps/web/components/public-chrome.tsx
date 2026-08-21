@@ -36,7 +36,7 @@ export function PublicFooter() {
     <footer>
       <span>Copyright 2026 Aksara Nusa Global Publishing</span>
       <span className="publisher-values">Knowledge | Integrity | Impact | International</span>
-      <span>Metadata demonstrasi bersifat fiktif.</span>
+      <span>Metadata publik hanya berasal dari rekam publikasi yang telah disetujui.</span>
     </footer>
   );
 }

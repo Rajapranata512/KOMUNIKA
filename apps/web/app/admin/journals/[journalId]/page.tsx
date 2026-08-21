@@ -58,12 +58,33 @@ interface ManagedJournal {
   }>;
   templates: Array<{
     id: string;
-    kind: 'AUTHOR_GUIDELINES' | 'MANUSCRIPT_TEMPLATE' | 'COPYRIGHT_NOTICE';
+    kind:
+      | 'AUTHOR_GUIDELINES'
+      | 'MANUSCRIPT_TEMPLATE'
+      | 'COPYRIGHT_NOTICE'
+      | 'DECISION_REJECT'
+      | 'DECISION_MAJOR_REVISION'
+      | 'DECISION_MINOR_REVISION'
+      | 'DECISION_ACCEPT';
     slug: string;
     title: string;
     body: string;
     sortOrder: number;
     isActive: boolean;
+  }>;
+  reviewForms: Array<{
+    id: string;
+    name: string;
+    version: number;
+    sectionId: string | null;
+    isActive: boolean;
+    questions: Array<{
+      id: string;
+      prompt: string;
+      type: string;
+      required: boolean;
+      sortOrder: number;
+    }>;
   }>;
 }
 
@@ -74,6 +95,7 @@ const errorCopy: Record<string, string> = {
   checklist: 'Checklist pengajuan tidak dapat disimpan.',
   declaration: 'Deklarasi tidak dapat disimpan.',
   template: 'Template tidak dapat disimpan.',
+  'review-form': 'Form peer review tidak dapat disimpan.',
 };
 
 export default async function JournalSettingsPage({
@@ -566,6 +588,10 @@ export default async function JournalSettingsPage({
             <option value={'AUTHOR_GUIDELINES'}>Pedoman penulis</option>
             <option value={'MANUSCRIPT_TEMPLATE'}>Template naskah</option>
             <option value={'COPYRIGHT_NOTICE'}>Pernyataan hak cipta</option>
+            <option value={'DECISION_REJECT'}>Surat keputusan: reject</option>
+            <option value={'DECISION_MAJOR_REVISION'}>Surat keputusan: revisi mayor</option>
+            <option value={'DECISION_MINOR_REVISION'}>Surat keputusan: revisi minor</option>
+            <option value={'DECISION_ACCEPT'}>Surat keputusan: accept</option>
           </select>
           <label htmlFor={'template-title'}>Judul</label>
           <input id={'template-title'} name={'title'} required minLength={3} />
@@ -601,6 +627,10 @@ export default async function JournalSettingsPage({
                   <option value={'AUTHOR_GUIDELINES'}>Pedoman penulis</option>
                   <option value={'MANUSCRIPT_TEMPLATE'}>Template naskah</option>
                   <option value={'COPYRIGHT_NOTICE'}>Pernyataan hak cipta</option>
+                  <option value={'DECISION_REJECT'}>Surat keputusan: reject</option>
+                  <option value={'DECISION_MAJOR_REVISION'}>Surat keputusan: revisi mayor</option>
+                  <option value={'DECISION_MINOR_REVISION'}>Surat keputusan: revisi minor</option>
+                  <option value={'DECISION_ACCEPT'}>Surat keputusan: accept</option>
                 </select>
                 <label htmlFor={`template-title-${template.id}`}>Judul</label>
                 <input
@@ -649,6 +679,62 @@ export default async function JournalSettingsPage({
           </div>
         ) : (
           <p>Belum ada template.</p>
+        )}
+      </section>
+
+      <section className={'admin-next'} aria-labelledby={'review-forms-heading'}>
+        <h2 id={'review-forms-heading'}>Form peer review</h2>
+        <p>
+          Setiap penyimpanan dengan nama yang sama membuat versi baru dan menonaktifkan versi
+          sebelumnya.
+        </p>
+        <form action={'/auth/journal-config'} method={'post'} className={'auth-form'}>
+          <input type={'hidden'} name={'action'} value={'create-review-form'} />
+          <input type={'hidden'} name={'journalId'} value={journal.id} />
+          <label htmlFor={'review-form-name'}>Nama form</label>
+          <input id={'review-form-name'} name={'name'} required minLength={3} />
+          <label htmlFor={'review-form-section'}>Seksi (opsional)</label>
+          <select id={'review-form-section'} name={'sectionId'} defaultValue={''}>
+            <option value={''}>Semua seksi</option>
+            {journal.sections
+              .filter(({ isActive }) => isActive)
+              .map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.title}
+                </option>
+              ))}
+          </select>
+          <label htmlFor={'review-form-questions'}>Pertanyaan wajib (satu per baris)</label>
+          <textarea
+            id={'review-form-questions'}
+            name={'questions'}
+            required
+            minLength={5}
+            rows={7}
+          />
+          <button type={'submit'}>Buat versi form review</button>
+        </form>
+        {journal.reviewForms.length ? (
+          <div className={'config-list'}>
+            {journal.reviewForms.map((form) => (
+              <article key={form.id} className={'config-item-form'}>
+                <h3>
+                  {form.name} · versi {form.version}
+                </h3>
+                <p>
+                  {form.isActive ? 'Aktif' : 'Arsip'} ·{' '}
+                  {form.sectionId ? 'Khusus seksi' : 'Semua seksi'}
+                </p>
+                <ol>
+                  {form.questions.map((question) => (
+                    <li key={question.id}>{question.prompt}</li>
+                  ))}
+                </ol>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p>Belum ada form review. Buat sedikitnya satu sebelum mengundang reviewer.</p>
         )}
       </section>
     </main>

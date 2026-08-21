@@ -18,6 +18,7 @@ import type { Response } from 'express';
 import { z } from 'zod';
 
 import { AuthService } from './auth.service.js';
+import { MfaService } from './mfa.service.js';
 import type { RequestWithContext } from './identity.types.js';
 import { LoginRateLimitService } from './rate-limit.service.js';
 
@@ -26,6 +27,8 @@ const passwordSchema = z.string().min(12).max(256).regex(/[a-z]/).regex(/[A-Z]/)
 const registerSchema = z.object({ email: z.email(), password: passwordSchema });
 const tokenSchema = z.object({ token: z.string().min(32).max(256) });
 const resetSchema = tokenSchema.extend({ password: passwordSchema });
+const mfaCodeSchema = z.object({ code: z.string().regex(/^\d{6}$/) });
+const mfaChallengeSchema = mfaCodeSchema.extend({ challengeToken: z.string().min(32).max(256) });
 
 function cookieValue(request: RequestWithContext, name: string): string | undefined {
   const entry = request.headers.cookie
@@ -40,6 +43,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly limiter: LoginRateLimitService,
+    private readonly mfa: MfaService,
   ) {}
 
   private setSessionCookies(
@@ -187,8 +191,90 @@ export class AuthController {
       throw new UnauthorizedException(
         createApiError('AUTH_INVALID_CREDENTIALS', 'Email atau password tidak valid.', requestId),
       );
+    if (result.mfaRequired) return { mfaRequired: true, challengeToken: result.challengeToken };
     this.setSessionCookies(response, result);
     return { user: { email: result.user.email, platformRole: result.user.platformRole } };
+  }
+
+  @Post('mfa/challenges/verify')
+  async verifyMfaChallenge(
+    @Body() input: unknown,
+    @Req() request: RequestWithContext,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const parsed = mfaChallengeSchema.safeParse(input);
+    const result = parsed.success
+      ? await this.auth.completeMfaLogin(
+          parsed.data.challengeToken,
+          parsed.data.code,
+          request.requestId ?? 'unknown',
+        )
+      : null;
+    if (!result)
+      throw new UnauthorizedException(
+        createApiError(
+          'MFA_CHALLENGE_INVALID',
+          'Challenge atau kode autentikator tidak valid.',
+          request.requestId ?? 'unknown',
+        ),
+      );
+    this.setSessionCookies(response, result);
+    return { user: { email: result.user.email, platformRole: result.user.platformRole } };
+  }
+
+  @Get('mfa')
+  async mfaStatus(@Req() request: RequestWithContext) {
+    const identity = await this.auth.authenticate(cookieValue(request, 'aksara_session'));
+    if (!identity)
+      throw new UnauthorizedException(
+        createApiError(
+          'ADMIN_ACCESS_DENIED',
+          'Akses administrator tidak tersedia.',
+          request.requestId ?? 'unknown',
+        ),
+      );
+    return this.mfa.status(identity.user.id);
+  }
+
+  @Post('mfa/setup')
+  async setupMfa(
+    @Req() request: RequestWithContext,
+    @Headers('x-csrf-token') csrfToken: string | undefined,
+  ) {
+    const identity = await this.auth.authenticate(cookieValue(request, 'aksara_session'));
+    if (!identity || !csrfToken || csrfToken !== cookieValue(request, 'aksara_csrf'))
+      throw new UnauthorizedException(
+        createApiError('CSRF_INVALID', 'Permintaan tidak valid.', request.requestId ?? 'unknown'),
+      );
+    return this.mfa.beginSetup(
+      identity.user.id,
+      identity.user.email,
+      request.requestId ?? 'unknown',
+    );
+  }
+
+  @Post('mfa/setup/confirm')
+  async confirmMfa(
+    @Body() input: unknown,
+    @Req() request: RequestWithContext,
+    @Headers('x-csrf-token') csrfToken: string | undefined,
+  ) {
+    const identity = await this.auth.authenticate(cookieValue(request, 'aksara_session'));
+    const parsed = mfaCodeSchema.safeParse(input);
+    if (
+      !identity ||
+      !parsed.success ||
+      !csrfToken ||
+      csrfToken !== cookieValue(request, 'aksara_csrf')
+    )
+      throw new UnauthorizedException(
+        createApiError('CSRF_INVALID', 'Permintaan tidak valid.', request.requestId ?? 'unknown'),
+      );
+    return this.mfa.confirmSetup(
+      identity.user.id,
+      parsed.data.code,
+      request.requestId ?? 'unknown',
+    );
   }
 
   @Get('me')

@@ -175,5 +175,20 @@ export async function POST(request: NextRequest) {
     return redirectTo(request, journalId, response.ok, 'template');
   }
 
+  if (action === 'create-review-form') {
+    const sectionId = text(form, 'sectionId');
+    const questions = text(form, 'questions')
+      .split('\n')
+      .map((prompt) => prompt.trim())
+      .filter(Boolean)
+      .map((prompt) => ({ prompt, type: 'LONG_TEXT', required: true }));
+    const response = await send(
+      'POST',
+      `/admin/journals/${encodeURIComponent(journalId)}/review-forms`,
+      { name: text(form, 'name'), sectionId: sectionId || null, questions },
+    );
+    return redirectTo(request, journalId, response.ok, 'review-form');
+  }
+
   return redirectTo(request, journalId, false, 'update');
 }

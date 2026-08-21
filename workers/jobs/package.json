@@ -15,9 +15,12 @@
     "test:visual": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@aksara/database": "workspace:*",
     "@aksara/domain": "workspace:*",
+    "@aws-sdk/client-s3": "3.1114.0",
     "bullmq": "^5.56.0",
-    "nodemailer": "^7.0.0"
+    "file-type": "21.3.2",
+    "nodemailer": "^9.0.5"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -23,7 +23,10 @@ function redisConnection(urlInput: string) {
     password: url.password ? decodeURIComponent(url.password) : undefined,
     db: databaseNumber,
     ...(url.protocol === 'rediss:' ? { tls: {} } : {}),
-    maxRetriesPerRequest: null,
+    maxRetriesPerRequest: 1,
+    enableOfflineQueue: false,
+    connectTimeout: 3_000,
+    retryStrategy: (attempt: number) => (attempt > 2 ? null : Math.min(attempt * 250, 1_000)),
   };
 }
 
@@ -35,7 +38,7 @@ export class TransactionalEmailQueue implements OnApplicationShutdown {
   async enqueue(job: TransactionalEmailJob, deliveryKey: string): Promise<EmailDeliveryState> {
     const mode =
       process.env.EMAIL_DELIVERY_MODE ??
-      (process.env.APP_ENV === 'local' ? 'development-token' : 'disabled');
+      (process.env.APP_ENV === 'development' ? 'development-token' : 'disabled');
     if (mode === 'development-token') return 'development-token';
     if (mode !== 'queue') return 'disabled';
 

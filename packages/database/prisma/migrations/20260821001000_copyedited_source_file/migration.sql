@@ -1,0 +1,1 @@
+ALTER TYPE "SubmissionFilePurpose" ADD VALUE 'COPYEDITED_SOURCE';

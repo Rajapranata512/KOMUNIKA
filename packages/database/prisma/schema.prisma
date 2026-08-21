@@ -35,56 +35,262 @@ enum JournalTemplateKind {
   AUTHOR_GUIDELINES
   MANUSCRIPT_TEMPLATE
   COPYRIGHT_NOTICE
+  DECISION_REJECT
+  DECISION_MAJOR_REVISION
+  DECISION_MINOR_REVISION
+  DECISION_ACCEPT
+}
+
+enum SubmissionState {
+  DRAFT
+  SUBMITTED
+  INITIAL_SCREENING
+  PRE_REVIEW_CORRECTION_REQUESTED
+  EDITOR_ASSIGNED
+  UNDER_REVIEW
+  REVISION_REQUIRED
+  RESUBMITTED
+  ACCEPTED
+  COPYEDITING
+  PRODUCTION
+  SCHEDULED
+  PUBLISHED
+  DESK_REJECTED
+  REJECTED
+  WITHDRAWN
+  DECLINED_BY_JOURNAL
+  RETRACTED
+  ARCHIVED
+}
+
+enum FileVisibility {
+  PRIVATE
+  EDITORIAL_TEAM
+  REVIEWER
+  AUTHOR
+  PUBLIC
+}
+
+enum FileScanStatus {
+  AWAITING_UPLOAD
+  QUARANTINED
+  CLEAN
+  INFECTED
+  REJECTED
+}
+
+enum SubmissionFilePurpose {
+  MANUSCRIPT
+  SUPPLEMENTARY
+  COVER_LETTER
+  RESPONSE
+  COPYEDITED_SOURCE
+}
+
+enum ScreeningDecisionType {
+  REQUEST_CORRECTION
+  DESK_REJECT
+  ASSIGN_EDITOR
+}
+
+enum ReviewerAvailability {
+  AVAILABLE
+  LIMITED
+  UNAVAILABLE
+}
+
+enum ReviewInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum ReviewConflictStatus {
+  NOT_DECLARED
+  NO_CONFLICT
+  CONFLICT_DECLARED
+}
+
+enum ReviewResponseStatus {
+  DRAFT
+  SUBMITTED
+}
+
+enum ReviewRecommendation {
+  ACCEPT
+  MINOR_REVISION
+  MAJOR_REVISION
+  REJECT
+}
+
+enum ReviewQuestionType {
+  LONG_TEXT
+  BOOLEAN
+  RATING
+}
+
+enum EditorialDecisionType {
+  REJECT
+  MAJOR_REVISION
+  MINOR_REVISION
+  ACCEPT
+}
+
+enum RevisionEvaluationMode {
+  EXTERNAL_REVIEW
+  EDITOR_ONLY
+}
+
+enum ProductionStage {
+  COPYEDITING
+  PRODUCTION
+}
+
+enum IssueStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+enum PublicationStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  WITHDRAWN
+  RETRACTED
+}
+
+enum GalleyFormat {
+  PDF
+  HTML
+  EPUB
+  XML
+}
+
+enum ProductionQueryStatus {
+  OPEN
+  RESOLVED
+}
+
+enum PublicationUpdateType {
+  CORRECTION
+  WITHDRAWAL
+  RETRACTION
 }
 
 model User {
-  id              String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  email           String        @unique
-  passwordHash    String
-  platformRole    PlatformRole?
-  fullName        String?
-  affiliation     String?
-  countryCode     String?
-  expertise       String[]      @default([])
-  orcidId         String?
-  locale          String        @default("id-ID")
-  timezone        String        @default("Asia/Jakarta")
-  emailVerifiedAt DateTime?     @db.Timestamptz
-  disabledAt      DateTime?     @db.Timestamptz
-  createdAt       DateTime      @default(now()) @db.Timestamptz
-  updatedAt       DateTime      @updatedAt @db.Timestamptz
-  sessions        Session[]
-  emailVerificationTokens EmailVerificationToken[]
-  passwordResetTokens PasswordResetToken[]
-  journalMemberships JournalMembership[]
-  journalsCreated Journal[] @relation("JournalCreator")
-  auditEvents     AuditEvent[]
+  id                         String                   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  email                      String                   @unique
+  passwordHash               String
+  platformRole               PlatformRole?
+  fullName                   String?
+  affiliation                String?
+  countryCode                String?
+  expertise                  String[]                 @default([])
+  orcidId                    String?
+  locale                     String                   @default("id-ID")
+  timezone                   String                   @default("Asia/Jakarta")
+  emailVerifiedAt            DateTime?                @db.Timestamptz
+  disabledAt                 DateTime?                @db.Timestamptz
+  createdAt                  DateTime                 @default(now()) @db.Timestamptz
+  updatedAt                  DateTime                 @updatedAt @db.Timestamptz
+  sessions                   Session[]
+  emailVerificationTokens    EmailVerificationToken[]
+  passwordResetTokens        PasswordResetToken[]
+  journalMemberships         JournalMembership[]
+  journalsCreated            Journal[]                @relation("JournalCreator")
+  auditEvents                AuditEvent[]
+  mfaCredential              MfaCredential?
+  mfaChallenges              MfaChallenge[]
+  submissions                Submission[]             @relation("SubmissionSubmitter")
+  submissionAuthors          SubmissionAuthor[]       @relation("SubmissionAuthorUser")
+  filesUploaded              StoredFile[]             @relation("StoredFileUploader")
+  editorialAssignments       EditorialAssignment[]    @relation("EditorialAssignee")
+  assignmentsCreated         EditorialAssignment[]    @relation("EditorialAssigner")
+  screeningAssessments       ScreeningAssessment[]
+  screeningDecisions         ScreeningDecision[]
+  editorialNotes             InternalEditorialNote[]
+  reviewerProfiles           ReviewerProfile[]
+  reviewRoundsAssigned       ReviewRound[]            @relation("ReviewRoundEditor")
+  reviewInvitations          ReviewInvitation[]       @relation("ReviewInvitee")
+  reviewInvitationsSent      ReviewInvitation[]       @relation("ReviewInviter")
+  reviewAssignments          ReviewAssignment[]
+  editorialDecisions         EditorialDecision[]
+  productionAssignments      ProductionAssignment[]   @relation("ProductionAssignee")
+  productionAssigned         ProductionAssignment[]   @relation("ProductionAssigner")
+  productionQueriesOpened    ProductionQuery[]        @relation("ProductionQueryOpener")
+  productionQueriesAnswered  ProductionQuery[]        @relation("ProductionQueryResponder")
+  publicationVersionsCreated PublicationVersion[]
+  publicationUpdatesCreated  PublicationUpdate[]
+}
+
+model MfaCredential {
+  id              String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId          String    @unique @db.Uuid
+  secretEncrypted String
+  enabledAt       DateTime? @db.Timestamptz
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MfaChallenge {
+  id        String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz
+  usedAt    DateTime? @db.Timestamptz
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now()) @db.Timestamptz
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }
 
 model Journal {
-  id                String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  slug              String              @unique
-  title             String
-  abbreviation      String
-  description       String
-  scope             String
-  contactEmail      String
-  printIssn         String?
-  electronicIssn    String?
-  primaryLanguage   String              @default("id")
-  reviewModel       ReviewModel         @default(DOUBLE_ANONYMOUS)
-  status            JournalStatus       @default(DRAFT)
-  submissionsOpen   Boolean             @default(false)
-  createdById       String              @db.Uuid
-  createdAt         DateTime            @default(now()) @db.Timestamptz
-  updatedAt         DateTime            @updatedAt @db.Timestamptz
-  createdBy         User                @relation("JournalCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  memberships       JournalMembership[]
-  sections          JournalSection[]
-  articleTypes      ArticleType[]
-  checklistItems    SubmissionChecklistItem[]
-  declarations      JournalDeclaration[]
-  templates         JournalTemplate[]
+  id                    String                    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  slug                  String                    @unique
+  title                 String
+  abbreviation          String
+  description           String
+  scope                 String
+  contactEmail          String
+  printIssn             String?
+  electronicIssn        String?
+  primaryLanguage       String                    @default("id")
+  reviewModel           ReviewModel               @default(DOUBLE_ANONYMOUS)
+  status                JournalStatus             @default(DRAFT)
+  submissionsOpen       Boolean                   @default(false)
+  createdById           String                    @db.Uuid
+  createdAt             DateTime                  @default(now()) @db.Timestamptz
+  updatedAt             DateTime                  @updatedAt @db.Timestamptz
+  createdBy             User                      @relation("JournalCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  memberships           JournalMembership[]
+  sections              JournalSection[]
+  articleTypes          ArticleType[]
+  checklistItems        SubmissionChecklistItem[]
+  declarations          JournalDeclaration[]
+  templates             JournalTemplate[]
+  submissions           Submission[]
+  storedFiles           StoredFile[]
+  editorialAssignments  EditorialAssignment[]
+  screeningAssessments  ScreeningAssessment[]
+  screeningDecisions    ScreeningDecision[]
+  editorialNotes        InternalEditorialNote[]
+  reviewerProfiles      ReviewerProfile[]
+  reviewForms           ReviewForm[]
+  reviewRounds          ReviewRound[]
+  reviewInvitations     ReviewInvitation[]
+  editorialDecisions    EditorialDecision[]
+  revisions             Revision[]
+  productionAssignments ProductionAssignment[]
+  issues                Issue[]
+  publications          Publication[]
+  publicationVersions   PublicationVersion[]
+  productionQueries     ProductionQuery[]
+  publicationUpdates    PublicationUpdate[]
 
   @@index([status, title])
 }
@@ -104,36 +310,38 @@ model JournalMembership {
 }
 
 model JournalSection {
-  id          String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  journalId   String        @db.Uuid
-  slug        String
-  title       String
-  description String        @default("")
-  sortOrder   Int           @default(0)
-  isActive    Boolean       @default(true)
-  createdAt   DateTime      @default(now()) @db.Timestamptz
-  updatedAt   DateTime      @updatedAt @db.Timestamptz
-  journal     Journal       @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  id           String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId    String        @db.Uuid
+  slug         String
+  title        String
+  description  String        @default("")
+  sortOrder    Int           @default(0)
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now()) @db.Timestamptz
+  updatedAt    DateTime      @updatedAt @db.Timestamptz
+  journal      Journal       @relation(fields: [journalId], references: [id], onDelete: Cascade)
   articleTypes ArticleType[]
+  reviewForms  ReviewForm[]
 
   @@unique([journalId, slug])
   @@index([journalId, sortOrder])
 }
 
 model ArticleType {
-  id                  String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  journalId           String          @db.Uuid
-  sectionId           String?         @db.Uuid
-  slug                String
-  title               String
-  description         String          @default("")
-  peerReviewRequired  Boolean         @default(true)
-  sortOrder           Int             @default(0)
-  isActive            Boolean         @default(true)
-  createdAt           DateTime        @default(now()) @db.Timestamptz
-  updatedAt           DateTime        @updatedAt @db.Timestamptz
-  journal             Journal         @relation(fields: [journalId], references: [id], onDelete: Cascade)
-  section             JournalSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  id                 String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId          String          @db.Uuid
+  sectionId          String?         @db.Uuid
+  slug               String
+  title              String
+  description        String          @default("")
+  peerReviewRequired Boolean         @default(true)
+  sortOrder          Int             @default(0)
+  isActive           Boolean         @default(true)
+  createdAt          DateTime        @default(now()) @db.Timestamptz
+  updatedAt          DateTime        @updatedAt @db.Timestamptz
+  journal            Journal         @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  section            JournalSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  submissions        Submission[]
 
   @@unique([journalId, slug])
   @@index([journalId, sortOrder])
@@ -141,30 +349,32 @@ model ArticleType {
 }
 
 model SubmissionChecklistItem {
-  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  journalId  String   @db.Uuid
-  label      String
-  isRequired Boolean  @default(true)
-  sortOrder  Int      @default(0)
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now()) @db.Timestamptz
-  updatedAt  DateTime @updatedAt @db.Timestamptz
-  journal    Journal  @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  id          String                          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId   String                          @db.Uuid
+  label       String
+  isRequired  Boolean                         @default(true)
+  sortOrder   Int                             @default(0)
+  isActive    Boolean                         @default(true)
+  createdAt   DateTime                        @default(now()) @db.Timestamptz
+  updatedAt   DateTime                        @updatedAt @db.Timestamptz
+  journal     Journal                         @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  acceptances SubmissionChecklistAcceptance[]
 
   @@index([journalId, sortOrder])
 }
 
 model JournalDeclaration {
-  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  journalId  String   @db.Uuid
-  code       String
-  version    Int
-  title      String
-  body       String
-  isRequired Boolean  @default(true)
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now()) @db.Timestamptz
-  journal    Journal  @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  id          String                            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId   String                            @db.Uuid
+  code        String
+  version     Int
+  title       String
+  body        String
+  isRequired  Boolean                           @default(true)
+  isActive    Boolean                           @default(true)
+  createdAt   DateTime                          @default(now()) @db.Timestamptz
+  journal     Journal                           @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  acceptances SubmissionDeclarationAcceptance[]
 
   @@unique([journalId, code, version])
   @@index([journalId, code, isActive])
@@ -185,6 +395,682 @@ model JournalTemplate {
 
   @@unique([journalId, slug])
   @@index([journalId, kind, sortOrder])
+}
+
+model Submission {
+  id                    String                            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId             String                            @db.Uuid
+  submitterId           String                            @db.Uuid
+  articleTypeId         String                            @db.Uuid
+  state                 SubmissionState                   @default(DRAFT)
+  title                 String                            @default("")
+  subtitle              String?
+  abstract              String                            @default("")
+  coverLetter           String                            @default("")
+  language              String                            @default("id")
+  finalizationKey       String?                           @unique
+  acceptedVersionId     String?                           @unique @db.Uuid
+  submittedAt           DateTime?                         @db.Timestamptz
+  createdAt             DateTime                          @default(now()) @db.Timestamptz
+  updatedAt             DateTime                          @updatedAt @db.Timestamptz
+  journal               Journal                           @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submitter             User                              @relation("SubmissionSubmitter", fields: [submitterId], references: [id], onDelete: Restrict)
+  articleType           ArticleType                       @relation(fields: [articleTypeId], references: [id], onDelete: Restrict)
+  authors               SubmissionAuthor[]
+  keywords              SubmissionKeyword[]
+  subjects              SubmissionSubject[]
+  declarations          SubmissionDeclarationAcceptance[]
+  checklistAcceptances  SubmissionChecklistAcceptance[]
+  versions              SubmissionVersion[]               @relation("SubmissionVersions")
+  acceptedVersion       SubmissionVersion?                @relation("AcceptedSubmissionVersion", fields: [acceptedVersionId], references: [id], onDelete: Restrict)
+  timeline              SubmissionTimelineEvent[]
+  files                 SubmissionFile[]
+  editorialAssignments  EditorialAssignment[]
+  screeningAssessments  ScreeningAssessment[]
+  screeningDecisions    ScreeningDecision[]
+  editorialNotes        InternalEditorialNote[]
+  reviewRounds          ReviewRound[]
+  editorialDecisions    EditorialDecision[]
+  revisions             Revision[]
+  productionAssignments ProductionAssignment[]
+  productionQueries     ProductionQuery[]
+  publication           Publication?
+
+  @@index([submitterId, state, updatedAt])
+  @@index([journalId, state, submittedAt])
+}
+
+model EditorialAssignment {
+  id             String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId      String     @db.Uuid
+  submissionId   String     @db.Uuid
+  editorId       String     @db.Uuid
+  assignedById   String     @db.Uuid
+  assignmentNote String     @default("")
+  overrideReason String?
+  active         Boolean    @default(true)
+  assignedAt     DateTime   @default(now()) @db.Timestamptz
+  endedAt        DateTime?  @db.Timestamptz
+  journal        Journal    @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission     Submission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  editor         User       @relation("EditorialAssignee", fields: [editorId], references: [id], onDelete: Restrict)
+  assignedBy     User       @relation("EditorialAssigner", fields: [assignedById], references: [id], onDelete: Restrict)
+
+  @@index([journalId, active, assignedAt])
+  @@index([editorId, active, assignedAt])
+  @@index([submissionId, assignedAt])
+}
+
+model ScreeningAssessment {
+  id                 String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId          String     @db.Uuid
+  submissionId       String     @db.Uuid
+  actorId            String     @db.Uuid
+  completenessPassed Boolean
+  scopePassed        Boolean
+  policyPassed       Boolean
+  internalNote       String     @default("")
+  createdAt          DateTime   @default(now()) @db.Timestamptz
+  journal            Journal    @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission         Submission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  actor              User       @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId, createdAt])
+  @@index([journalId, createdAt])
+}
+
+model ScreeningDecision {
+  id              String                @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId       String                @db.Uuid
+  submissionId    String                @db.Uuid
+  actorId         String                @db.Uuid
+  type            ScreeningDecisionType
+  reason          String
+  authorLetter    String                @default("")
+  requiredChanges String[]              @default([])
+  resultingState  SubmissionState
+  createdAt       DateTime              @default(now()) @db.Timestamptz
+  journal         Journal               @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission      Submission            @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  actor           User                  @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId, createdAt])
+  @@index([journalId, type, createdAt])
+}
+
+model InternalEditorialNote {
+  id           String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId    String     @db.Uuid
+  submissionId String     @db.Uuid
+  actorId      String     @db.Uuid
+  body         String
+  createdAt    DateTime   @default(now()) @db.Timestamptz
+  journal      Journal    @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  actor        User       @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId, createdAt])
+  @@index([journalId, createdAt])
+}
+
+model SubmissionAuthor {
+  id              String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId    String     @db.Uuid
+  userId          String?    @db.Uuid
+  givenName       String
+  familyName      String
+  email           String
+  affiliation     String
+  countryCode     String?
+  orcidId         String?
+  isCorresponding Boolean    @default(false)
+  sortOrder       Int
+  submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user            User?      @relation("SubmissionAuthorUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([submissionId, sortOrder])
+  @@index([submissionId, isCorresponding])
+}
+
+model SubmissionKeyword {
+  id           String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId String     @db.Uuid
+  value        String
+  sortOrder    Int
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, value])
+  @@unique([submissionId, sortOrder])
+}
+
+model SubmissionSubject {
+  id           String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId String     @db.Uuid
+  value        String
+  sortOrder    Int
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, value])
+  @@unique([submissionId, sortOrder])
+}
+
+model SubmissionDeclarationAcceptance {
+  id                 String             @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId       String             @db.Uuid
+  declarationId      String             @db.Uuid
+  accepted           Boolean            @default(false)
+  acceptedAt         DateTime?          @db.Timestamptz
+  declarationTitle   String
+  declarationBody    String
+  declarationCode    String
+  declarationVersion Int
+  requiredSnapshot   Boolean            @default(true)
+  submission         Submission         @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  declaration        JournalDeclaration @relation(fields: [declarationId], references: [id], onDelete: Restrict)
+
+  @@unique([submissionId, declarationId])
+  @@index([submissionId, accepted])
+}
+
+model SubmissionChecklistAcceptance {
+  id               String                  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId     String                  @db.Uuid
+  checklistItemId  String                  @db.Uuid
+  accepted         Boolean                 @default(false)
+  acceptedAt       DateTime?               @db.Timestamptz
+  labelSnapshot    String
+  requiredSnapshot Boolean                 @default(true)
+  submission       Submission              @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  checklistItem    SubmissionChecklistItem @relation(fields: [checklistItemId], references: [id], onDelete: Restrict)
+
+  @@unique([submissionId, checklistItemId])
+  @@index([submissionId, accepted])
+}
+
+model SubmissionVersion {
+  id                  String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId        String               @db.Uuid
+  version             Int
+  snapshot            Json
+  createdAt           DateTime             @default(now()) @db.Timestamptz
+  submission          Submission           @relation("SubmissionVersions", fields: [submissionId], references: [id], onDelete: Restrict)
+  acceptedFor         Submission?          @relation("AcceptedSubmissionVersion")
+  reviewRounds        ReviewRound[]
+  reviewAssignments   ReviewAssignment[]
+  targetedDecisions   EditorialDecision[]
+  baseForRevisions    Revision[]           @relation("RevisionBaseVersion")
+  submittedRevision   Revision?            @relation("RevisionSubmittedVersion")
+  publicationVersions PublicationVersion[]
+
+  @@unique([submissionId, version])
+}
+
+model SubmissionTimelineEvent {
+  id              String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId    String          @db.Uuid
+  actorId         String?         @db.Uuid
+  state           SubmissionState
+  action          String
+  description     String
+  visibleToAuthor Boolean         @default(true)
+  createdAt       DateTime        @default(now()) @db.Timestamptz
+  submission      Submission      @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId, createdAt])
+}
+
+model StoredFile {
+  id             String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId      String          @db.Uuid
+  uploaderId     String          @db.Uuid
+  storageKey     String          @unique
+  originalName   String
+  declaredMime   String
+  detectedMime   String?
+  size           Int
+  checksumSha256 String?
+  scanStatus     FileScanStatus  @default(AWAITING_UPLOAD)
+  visibility     FileVisibility  @default(PRIVATE)
+  uploadedAt     DateTime?       @db.Timestamptz
+  scannedAt      DateTime?       @db.Timestamptz
+  createdAt      DateTime        @default(now()) @db.Timestamptz
+  updatedAt      DateTime        @updatedAt @db.Timestamptz
+  journal        Journal         @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  uploader       User            @relation("StoredFileUploader", fields: [uploaderId], references: [id], onDelete: Restrict)
+  submissionFile SubmissionFile?
+  reviewFile     ReviewFile?
+  galley         Galley?
+  issueCover     Issue?          @relation("IssueCover")
+
+  @@index([journalId, scanStatus, createdAt])
+  @@index([uploaderId, createdAt])
+}
+
+model ReviewerProfile {
+  id                   String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId            String               @db.Uuid
+  userId               String               @db.Uuid
+  languages            String[]             @default([])
+  availability         ReviewerAvailability @default(AVAILABLE)
+  maxActiveAssignments Int                  @default(3)
+  biography            String               @default("")
+  createdAt            DateTime             @default(now()) @db.Timestamptz
+  updatedAt            DateTime             @updatedAt @db.Timestamptz
+  journal              Journal              @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expertise            ReviewerExpertise[]
+
+  @@unique([journalId, userId])
+  @@index([journalId, availability])
+}
+
+model ReviewerExpertise {
+  id        String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  profileId String          @db.Uuid
+  value     String
+  profile   ReviewerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, value])
+  @@index([value])
+}
+
+model ReviewForm {
+  id        String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId String               @db.Uuid
+  sectionId String?              @db.Uuid
+  name      String
+  version   Int
+  isActive  Boolean              @default(true)
+  createdAt DateTime             @default(now()) @db.Timestamptz
+  journal   Journal              @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  section   JournalSection?      @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  questions ReviewFormQuestion[]
+  rounds    ReviewRound[]
+
+  @@unique([journalId, name, version])
+  @@index([journalId, sectionId, isActive])
+}
+
+model ReviewFormQuestion {
+  id           String             @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  reviewFormId String             @db.Uuid
+  prompt       String
+  type         ReviewQuestionType @default(LONG_TEXT)
+  required     Boolean            @default(true)
+  sortOrder    Int                @default(0)
+  reviewForm   ReviewForm         @relation(fields: [reviewFormId], references: [id], onDelete: Cascade)
+  answers      ReviewAnswer[]
+
+  @@unique([reviewFormId, sortOrder])
+}
+
+model ReviewRound {
+  id                  String             @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId           String             @db.Uuid
+  submissionId        String             @db.Uuid
+  submissionVersionId String             @db.Uuid
+  reviewFormId        String             @db.Uuid
+  assignedEditorId    String             @db.Uuid
+  sequence            Int
+  openedAt            DateTime           @default(now()) @db.Timestamptz
+  closedAt            DateTime?          @db.Timestamptz
+  journal             Journal            @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission          Submission         @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  submissionVersion   SubmissionVersion  @relation(fields: [submissionVersionId], references: [id], onDelete: Restrict)
+  reviewForm          ReviewForm         @relation(fields: [reviewFormId], references: [id], onDelete: Restrict)
+  assignedEditor      User               @relation("ReviewRoundEditor", fields: [assignedEditorId], references: [id], onDelete: Restrict)
+  invitations         ReviewInvitation[]
+  assignments         ReviewAssignment[]
+  decision            EditorialDecision?
+
+  @@unique([submissionId, sequence])
+  @@index([journalId, openedAt])
+}
+
+model ReviewInvitation {
+  id               String                 @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId        String                 @db.Uuid
+  roundId          String                 @db.Uuid
+  reviewerId       String                 @db.Uuid
+  invitedById      String                 @db.Uuid
+  tokenHash        String                 @unique
+  status           ReviewInvitationStatus @default(PENDING)
+  conflictStatus   ReviewConflictStatus   @default(NOT_DECLARED)
+  conflictNote     String                 @default("")
+  responseDeadline DateTime               @db.Timestamptz
+  reviewDeadline   DateTime               @db.Timestamptz
+  respondedAt      DateTime?              @db.Timestamptz
+  tokenUsedAt      DateTime?              @db.Timestamptz
+  reminderCount    Int                    @default(0)
+  lastReminderAt   DateTime?              @db.Timestamptz
+  createdAt        DateTime               @default(now()) @db.Timestamptz
+  journal          Journal                @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  round            ReviewRound            @relation(fields: [roundId], references: [id], onDelete: Restrict)
+  reviewer         User                   @relation("ReviewInvitee", fields: [reviewerId], references: [id], onDelete: Restrict)
+  invitedBy        User                   @relation("ReviewInviter", fields: [invitedById], references: [id], onDelete: Restrict)
+  assignment       ReviewAssignment?
+
+  @@unique([roundId, reviewerId])
+  @@index([reviewerId, status, responseDeadline])
+  @@index([journalId, status, createdAt])
+}
+
+model ReviewAssignment {
+  id                  String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  roundId             String            @db.Uuid
+  invitationId        String            @unique @db.Uuid
+  reviewerId          String            @db.Uuid
+  submissionVersionId String            @db.Uuid
+  active              Boolean           @default(true)
+  acceptedAt          DateTime          @default(now()) @db.Timestamptz
+  dueAt               DateTime          @db.Timestamptz
+  lockedAt            DateTime?         @db.Timestamptz
+  round               ReviewRound       @relation(fields: [roundId], references: [id], onDelete: Restrict)
+  invitation          ReviewInvitation  @relation(fields: [invitationId], references: [id], onDelete: Restrict)
+  reviewer            User              @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+  submissionVersion   SubmissionVersion @relation(fields: [submissionVersionId], references: [id], onDelete: Restrict)
+  response            ReviewResponse?
+
+  @@unique([roundId, reviewerId])
+  @@index([reviewerId, active, dueAt])
+}
+
+model ReviewResponse {
+  id                   String                  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  assignmentId         String                  @unique @db.Uuid
+  status               ReviewResponseStatus    @default(DRAFT)
+  commentsToAuthor     String                  @default("")
+  confidentialComments String                  @default("")
+  recommendation       ReviewRecommendation?
+  submittedAt          DateTime?               @db.Timestamptz
+  createdAt            DateTime                @default(now()) @db.Timestamptz
+  updatedAt            DateTime                @updatedAt @db.Timestamptz
+  assignment           ReviewAssignment        @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+  answers              ReviewAnswer[]
+  files                ReviewFile[]
+  decisionReleases     DecisionReviewRelease[]
+}
+
+model ReviewAnswer {
+  id         String             @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  responseId String             @db.Uuid
+  questionId String             @db.Uuid
+  value      String
+  response   ReviewResponse     @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question   ReviewFormQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([responseId, questionId])
+}
+
+model ReviewFile {
+  id               String                      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  responseId       String                      @db.Uuid
+  storedFileId     String                      @unique @db.Uuid
+  authorVisible    Boolean                     @default(false)
+  createdAt        DateTime                    @default(now()) @db.Timestamptz
+  response         ReviewResponse              @relation(fields: [responseId], references: [id], onDelete: Restrict)
+  storedFile       StoredFile                  @relation(fields: [storedFileId], references: [id], onDelete: Restrict)
+  decisionReleases DecisionReviewFileRelease[]
+
+  @@index([responseId, authorVisible])
+}
+
+model SubmissionFile {
+  id           String                @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  submissionId String                @db.Uuid
+  storedFileId String                @unique @db.Uuid
+  purpose      SubmissionFilePurpose
+  sortOrder    Int                   @default(0)
+  revisionId   String?               @db.Uuid
+  createdAt    DateTime              @default(now()) @db.Timestamptz
+  submission   Submission            @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  storedFile   StoredFile            @relation(fields: [storedFileId], references: [id], onDelete: Restrict)
+  revision     Revision?             @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId, purpose, sortOrder])
+  @@index([revisionId, purpose, sortOrder])
+}
+
+model EditorialDecision {
+  id               String                      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId        String                      @db.Uuid
+  submissionId     String                      @db.Uuid
+  actorId          String                      @db.Uuid
+  reviewRoundId    String?                     @unique @db.Uuid
+  targetVersionId  String                      @db.Uuid
+  type             EditorialDecisionType
+  reason           String
+  resultingState   SubmissionState
+  revisionDueAt    DateTime?                   @db.Timestamptz
+  responseRequired Boolean                     @default(true)
+  evaluationMode   RevisionEvaluationMode?
+  releasedAt       DateTime                    @default(now()) @db.Timestamptz
+  createdAt        DateTime                    @default(now()) @db.Timestamptz
+  journal          Journal                     @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission       Submission                  @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  actor            User                        @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  reviewRound      ReviewRound?                @relation(fields: [reviewRoundId], references: [id], onDelete: Restrict)
+  targetVersion    SubmissionVersion           @relation(fields: [targetVersionId], references: [id], onDelete: Restrict)
+  letter           DecisionLetter?
+  reviewReleases   DecisionReviewRelease[]
+  fileReleases     DecisionReviewFileRelease[]
+  revision         Revision?
+
+  @@index([submissionId, createdAt])
+  @@index([journalId, type, createdAt])
+}
+
+model DecisionLetter {
+  id         String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  decisionId String            @unique @db.Uuid
+  subject    String
+  body       String
+  createdAt  DateTime          @default(now()) @db.Timestamptz
+  decision   EditorialDecision @relation(fields: [decisionId], references: [id], onDelete: Restrict)
+}
+
+model DecisionReviewRelease {
+  id                       String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  decisionId               String            @db.Uuid
+  reviewResponseId         String            @db.Uuid
+  commentsToAuthorSnapshot String
+  createdAt                DateTime          @default(now()) @db.Timestamptz
+  decision                 EditorialDecision @relation(fields: [decisionId], references: [id], onDelete: Restrict)
+  reviewResponse           ReviewResponse    @relation(fields: [reviewResponseId], references: [id], onDelete: Restrict)
+
+  @@unique([decisionId, reviewResponseId])
+}
+
+model DecisionReviewFileRelease {
+  id                   String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  decisionId           String            @db.Uuid
+  reviewFileId         String            @db.Uuid
+  originalNameSnapshot String
+  createdAt            DateTime          @default(now()) @db.Timestamptz
+  decision             EditorialDecision @relation(fields: [decisionId], references: [id], onDelete: Restrict)
+  reviewFile           ReviewFile        @relation(fields: [reviewFileId], references: [id], onDelete: Restrict)
+
+  @@unique([decisionId, reviewFileId])
+}
+
+model Revision {
+  id                 String             @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId          String             @db.Uuid
+  submissionId       String             @db.Uuid
+  decisionId         String             @unique @db.Uuid
+  baseVersionId      String             @db.Uuid
+  submittedVersionId String?            @unique @db.Uuid
+  responseRequired   Boolean            @default(true)
+  responseText       String             @default("")
+  dueAt              DateTime           @db.Timestamptz
+  finalizationKey    String?            @unique
+  submittedAt        DateTime?          @db.Timestamptz
+  reminderCount      Int                @default(0)
+  lastReminderAt     DateTime?          @db.Timestamptz
+  createdAt          DateTime           @default(now()) @db.Timestamptz
+  updatedAt          DateTime           @updatedAt @db.Timestamptz
+  journal            Journal            @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission         Submission         @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  decision           EditorialDecision  @relation(fields: [decisionId], references: [id], onDelete: Restrict)
+  baseVersion        SubmissionVersion  @relation("RevisionBaseVersion", fields: [baseVersionId], references: [id], onDelete: Restrict)
+  submittedVersion   SubmissionVersion? @relation("RevisionSubmittedVersion", fields: [submittedVersionId], references: [id], onDelete: Restrict)
+  files              SubmissionFile[]
+
+  @@index([submissionId, submittedAt])
+  @@index([journalId, dueAt])
+}
+
+model ProductionAssignment {
+  id           String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId    String          @db.Uuid
+  submissionId String          @db.Uuid
+  assigneeId   String          @db.Uuid
+  assignedById String          @db.Uuid
+  stage        ProductionStage
+  note         String          @default("")
+  active       Boolean         @default(true)
+  assignedAt   DateTime        @default(now()) @db.Timestamptz
+  endedAt      DateTime?       @db.Timestamptz
+  journal      Journal         @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission   Submission      @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  assignee     User            @relation("ProductionAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  assignedBy   User            @relation("ProductionAssigner", fields: [assignedById], references: [id], onDelete: Restrict)
+
+  @@index([journalId, stage, active])
+  @@index([submissionId, stage, active])
+  @@index([assigneeId, stage, active])
+}
+
+model ProductionQuery {
+  id            String                @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId     String                @db.Uuid
+  submissionId  String                @db.Uuid
+  openedById    String                @db.Uuid
+  respondedById String?               @db.Uuid
+  question      String
+  response      String                @default("")
+  status        ProductionQueryStatus @default(OPEN)
+  createdAt     DateTime              @default(now()) @db.Timestamptz
+  resolvedAt    DateTime?             @db.Timestamptz
+  journal       Journal               @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission    Submission            @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  openedBy      User                  @relation("ProductionQueryOpener", fields: [openedById], references: [id], onDelete: Restrict)
+  respondedBy   User?                 @relation("ProductionQueryResponder", fields: [respondedById], references: [id], onDelete: Restrict)
+
+  @@index([submissionId, status, createdAt])
+  @@index([journalId, status, createdAt])
+}
+
+model Issue {
+  id           String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId    String        @db.Uuid
+  coverFileId String?       @unique @db.Uuid
+  slug         String
+  volume       String
+  number       String
+  year         Int
+  title        String
+  description  String        @default("")
+  status       IssueStatus   @default(DRAFT)
+  scheduledAt  DateTime?     @db.Timestamptz
+  publishedAt  DateTime?     @db.Timestamptz
+  createdAt    DateTime      @default(now()) @db.Timestamptz
+  updatedAt    DateTime      @updatedAt @db.Timestamptz
+  journal      Journal       @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  coverFile    StoredFile?    @relation("IssueCover", fields: [coverFileId], references: [id], onDelete: Restrict)
+  publications Publication[]
+
+  @@unique([journalId, slug])
+  @@unique([journalId, volume, number, year])
+  @@index([journalId, status, year])
+}
+
+model Publication {
+  id             String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId      String               @db.Uuid
+  submissionId   String               @unique @db.Uuid
+  issueId        String?              @db.Uuid
+  slug           String
+  status         PublicationStatus    @default(DRAFT)
+  articleOrder   Int                  @default(0)
+  scheduledAt    DateTime?            @db.Timestamptz
+  publishedAt    DateTime?            @db.Timestamptz
+  publicationKey String?              @unique
+  createdAt      DateTime             @default(now()) @db.Timestamptz
+  updatedAt      DateTime             @updatedAt @db.Timestamptz
+  journal        Journal              @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  submission     Submission           @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  issue          Issue?               @relation(fields: [issueId], references: [id], onDelete: Restrict)
+  versions       PublicationVersion[]
+  updates        PublicationUpdate[]
+
+  @@unique([journalId, slug])
+  @@index([journalId, status, publishedAt])
+  @@index([issueId, articleOrder])
+}
+
+model PublicationVersion {
+  id              String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId       String            @db.Uuid
+  publicationId   String            @db.Uuid
+  sourceVersionId String            @db.Uuid
+  createdById     String            @db.Uuid
+  version         Int
+  title           String
+  subtitle        String?
+  abstract        String
+  authors         Json
+  keywords        String[]          @default([])
+  language        String            @default("id")
+  licenseName     String
+  licenseUrl      String
+  copyrightHolder String
+  pages           String?
+  eLocator        String?
+  doi             String?
+  createdAt       DateTime          @default(now()) @db.Timestamptz
+  journal         Journal           @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  publication     Publication       @relation(fields: [publicationId], references: [id], onDelete: Restrict)
+  sourceVersion   SubmissionVersion @relation(fields: [sourceVersionId], references: [id], onDelete: Restrict)
+  createdBy       User              @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  galleys         Galley[]
+
+  @@unique([publicationId, version])
+  @@index([journalId, createdAt])
+}
+
+model Galley {
+  id                   String             @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  publicationVersionId String             @db.Uuid
+  storedFileId         String             @unique @db.Uuid
+  label                String
+  format               GalleyFormat
+  locale               String             @default("id")
+  sortOrder            Int                @default(0)
+  approvedAt           DateTime?          @db.Timestamptz
+  createdAt            DateTime           @default(now()) @db.Timestamptz
+  publicationVersion   PublicationVersion @relation(fields: [publicationVersionId], references: [id], onDelete: Restrict)
+  storedFile           StoredFile         @relation(fields: [storedFileId], references: [id], onDelete: Restrict)
+
+  @@index([publicationVersionId, sortOrder])
+}
+
+model PublicationUpdate {
+  id            String                @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  journalId     String                @db.Uuid
+  publicationId String                @db.Uuid
+  createdById   String                @db.Uuid
+  type          PublicationUpdateType
+  reason        String
+  notice        String
+  effectiveAt   DateTime              @default(now()) @db.Timestamptz
+  createdAt     DateTime              @default(now()) @db.Timestamptz
+  journal       Journal               @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  publication   Publication           @relation(fields: [publicationId], references: [id], onDelete: Restrict)
+  createdBy     User                  @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([publicationId, effectiveAt])
+  @@index([journalId, type, effectiveAt])
 }
 
 model EmailVerificationToken {

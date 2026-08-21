@@ -78,7 +78,7 @@ describe('general identity lifecycle integration', () => {
 
   it('registers, verifies, manages sessions, and resets password once', async () => {
     const previousEnvironment = process.env.APP_ENV;
-    process.env.APP_ENV = 'local';
+    process.env.APP_ENV = 'development';
     try {
       const registration = await auth.register(
         email,

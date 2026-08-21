@@ -1,0 +1,3 @@
+ALTER TABLE "Revision"
+ADD COLUMN "reminderCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "lastReminderAt" TIMESTAMPTZ;

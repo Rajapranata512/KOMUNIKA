@@ -77,6 +77,20 @@ export default async function AdminPage() {
           jenis artikel, checklist, deklarasi, dan template.
         </p>
       </section>
+      <section className="admin-next" aria-labelledby="users-admin-heading">
+        <h2 id="users-admin-heading">Pengguna dan akses</h2>
+        <p>
+          <a href="/admin/users">Kelola pengguna</a> untuk meninjau akun, status verifikasi,
+          keanggotaan, dan menangguhkan akses secara teraudit.
+        </p>
+      </section>
+      <section className="admin-next" aria-labelledby="security-admin-heading">
+        <h2 id="security-admin-heading">Keamanan akun</h2>
+        <p>
+          <a href="/admin/security">Konfigurasi MFA</a> untuk mewajibkan kode autentikator setelah
+          password administrator.
+        </p>
+      </section>
       <section className={'admin-next'} aria-labelledby={'sessions-heading'}>
         <h2 id={'sessions-heading'}>Sesi aktif</h2>
         {sessionData.sessions.length ? (

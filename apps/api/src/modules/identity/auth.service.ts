@@ -2,10 +2,10 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import { Injectable, Optional } from '@nestjs/common';
 import { database } from '@aksara/database';
-import type { TransactionalEmailEvent } from '@aksara/domain';
 import { hash, verify } from 'argon2';
 
 import type { AuthenticatedAdmin, AuthenticatedUser } from './identity.types.js';
+import { MfaService } from './mfa.service.js';
 import {
   TransactionalEmailQueue,
   type EmailDeliveryState,
@@ -24,7 +24,10 @@ function digest(value: string): string {
 export class AuthService {
   private readonly dummyHash = hash('not-a-real-password', PASSWORD_OPTIONS);
 
-  constructor(@Optional() private readonly emails?: TransactionalEmailQueue) {}
+  constructor(
+    @Optional() private readonly emails?: TransactionalEmailQueue,
+    @Optional() private readonly mfa?: MfaService,
+  ) {}
 
   async register(emailInput: string, password: string, requestId: string) {
     const email = emailInput.trim().toLowerCase();
@@ -63,7 +66,7 @@ export class AuthService {
     return {
       user,
       deliveryState,
-      developmentToken: process.env.APP_ENV === 'local' ? token : undefined,
+      developmentToken: process.env.APP_ENV === 'development' ? token : undefined,
     };
   }
 
@@ -122,12 +125,12 @@ export class AuthService {
     );
     return {
       deliveryState,
-      developmentToken: process.env.APP_ENV === 'local' ? token : undefined,
+      developmentToken: process.env.APP_ENV === 'development' ? token : undefined,
     };
   }
 
   private async queueIdentityEmail(
-    event: TransactionalEmailEvent,
+    event: 'identity.verify-email' | 'identity.password-reset',
     userId: string,
     recipient: string,
     token: string,
@@ -138,7 +141,7 @@ export class AuthService {
           { event, recipient, token, userId, requestId, requestedAt: new Date().toISOString() },
           digest(token),
         )
-      : process.env.APP_ENV === 'local'
+      : process.env.APP_ENV === 'development'
         ? 'development-token'
         : 'disabled';
 
@@ -218,6 +221,27 @@ export class AuthService {
       return null;
     }
 
+    if (user.platformRole === 'PLATFORM_ADMIN') {
+      const credential = await database.mfaCredential.findUnique({ where: { userId: user.id } });
+      if (credential?.enabledAt && this.mfa) {
+        const challengeToken = await this.mfa.createChallenge(user.id, requestId);
+        return { mfaRequired: true as const, challengeToken };
+      }
+    }
+    return this.createSession(user, requestId);
+  }
+
+  async completeMfaLogin(challengeToken: string, code: string, requestId: string) {
+    if (!this.mfa) return null;
+    const user = await this.mfa.verifyChallenge(challengeToken, code, requestId);
+    if (!user || user.disabledAt || user.platformRole !== 'PLATFORM_ADMIN') return null;
+    return this.createSession(user, requestId);
+  }
+
+  private async createSession(
+    user: { id: string; email: string; platformRole: 'PLATFORM_ADMIN' | null },
+    requestId: string,
+  ) {
     const sessionToken = randomBytes(32).toString('base64url');
     const csrfToken = randomBytes(32).toString('base64url');
     const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
@@ -242,7 +266,14 @@ export class AuthService {
       return created;
     });
 
-    return { sessionToken, csrfToken, expiresAt, sessionId: session.id, user };
+    return {
+      mfaRequired: false as const,
+      sessionToken,
+      csrfToken,
+      expiresAt,
+      sessionId: session.id,
+      user,
+    };
   }
 
   async authenticateUser(sessionToken?: string): Promise<AuthenticatedUser | null> {
