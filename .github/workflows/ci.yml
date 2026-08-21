@@ -59,7 +59,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: touch .env
-      - run: docker compose -f infra/docker/compose.yml up -d --wait --wait-timeout 240
+      - name: Start healthy integration services
+        run: docker compose -f infra/docker/compose.yml up -d --wait --wait-timeout 240 postgres redis object-storage mailpit clamav
+      - name: Bootstrap object-storage buckets
+        run: docker compose -f infra/docker/compose.yml run --rm object-storage-init
       - run: pnpm --filter @aksara/database exec prisma migrate deploy --schema prisma/schema.prisma
       - run: pnpm test:integration
       - run: pnpm test:e2e
