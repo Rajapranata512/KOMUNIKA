@@ -67,7 +67,7 @@ describe('general identity lifecycle integration', () => {
   const email = `reader-${randomUUID()}@aksara.local`;
   const initialPassword = `Initial-A1-${randomUUID()}`;
   const replacementPassword = `Replacement-A1-${randomUUID()}`;
-  const enqueue = vi.fn().mockResolvedValue('queued');
+  const enqueue = vi.fn().mockResolvedValue('development-token');
   const auth = new AuthService({ enqueue } as unknown as TransactionalEmailQueue);
   let userId: string | undefined;
 

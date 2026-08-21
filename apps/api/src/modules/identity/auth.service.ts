@@ -66,7 +66,7 @@ export class AuthService {
     return {
       user,
       deliveryState,
-      developmentToken: process.env.APP_ENV === 'development' ? token : undefined,
+      developmentToken: deliveryState === 'development-token' ? token : undefined,
     };
   }
 
@@ -125,7 +125,7 @@ export class AuthService {
     );
     return {
       deliveryState,
-      developmentToken: process.env.APP_ENV === 'development' ? token : undefined,
+      developmentToken: deliveryState === 'development-token' ? token : undefined,
     };
   }
 

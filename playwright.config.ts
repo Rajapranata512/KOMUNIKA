@@ -40,7 +40,7 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'pnpm --filter @aksara/api exec dotenv -e ../../.env -- cross-env PORT=3101 APP_BASE_URL=http://localhost:3100 nest start --watch',
+        'pnpm --filter @aksara/api exec dotenv -e ../../.env -- cross-env PORT=3101 APP_BASE_URL=http://localhost:3100 EMAIL_DELIVERY_MODE=development-token nest start --watch',
       url: 'http://127.0.0.1:3101/api/v1/health',
       reuseExistingServer: false,
       timeout: 120_000,
