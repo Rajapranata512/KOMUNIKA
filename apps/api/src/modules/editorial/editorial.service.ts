@@ -182,7 +182,7 @@ export class EditorialService {
               ? 'Menunggu koreksi penulis'
               : 'Kelola assignment',
     }));
-    return { items, nextCursor: hasMore ? items.at(-1)?.id : null };
+    return { items, nextCursor: hasMore ? items[items.length - 1]?.id : null };
   }
 
   async detail(submissionId: string, userId: string) {
