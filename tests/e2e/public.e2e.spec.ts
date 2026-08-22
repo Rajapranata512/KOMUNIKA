@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('reader can navigate the public discovery pages', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Kelola penerbitan jurnal');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Naskah ilmiah');
 
   await page.getByRole('link', { name: 'Jelajahi jurnal' }).click();
   await expect(page).toHaveURL(/\/journals$/);
@@ -10,9 +10,9 @@ test('reader can navigate the public discovery pages', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Jurnal yang tersedia' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Cari' }).click();
-  await page.getByLabel('Kata pencarian').fill('metadata');
+  await page.getByLabel('Kata pencarian').fill('fixture-tidak-ada-xyz');
   await page.getByRole('button', { name: 'Cari artikel' }).click();
-  await expect(page).toHaveURL(/\/search\?q=metadata/);
+  await expect(page).toHaveURL(/\/search\?q=fixture-tidak-ada-xyz/);
   await expect(page.getByText(/0 hasil untuk/)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Tidak ada artikel yang cocok' })).toBeVisible();
 });

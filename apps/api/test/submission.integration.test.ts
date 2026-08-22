@@ -138,6 +138,45 @@ describe('author submission draft integration', () => {
     await database.$disconnect();
   });
 
+  it('allows an unverified author to prepare a draft but blocks final submission', async () => {
+    await database.user.update({ where: { id: authorId }, data: { emailVerifiedAt: null } });
+    let draftId = '';
+    try {
+      const draft = await submissions.createDraft(
+        journalId,
+        articleTypeId,
+        authorId,
+        `submission-unverified-${suffix}`,
+      );
+      expect(draft).not.toBeNull();
+      if (!draft) return;
+      draftId = draft.id;
+      const result = await submissions.finalize(
+        draft.id,
+        authorId,
+        `unverified-${suffix}`,
+        `submission-unverified-${suffix}`,
+      );
+      expect(result).toMatchObject({
+        validationErrors: expect.arrayContaining(['EMAIL_VERIFICATION_REQUIRED']),
+      });
+    } finally {
+      if (draftId) {
+        await database.$transaction([
+          database.submissionTimelineEvent.deleteMany({ where: { submissionId: draftId } }),
+          database.submissionDeclarationAcceptance.deleteMany({ where: { submissionId: draftId } }),
+          database.submissionChecklistAcceptance.deleteMany({ where: { submissionId: draftId } }),
+          database.submissionAuthor.deleteMany({ where: { submissionId: draftId } }),
+          database.submission.delete({ where: { id: draftId } }),
+        ]);
+      }
+      await database.user.update({
+        where: { id: authorId },
+        data: { emailVerifiedAt: new Date() },
+      });
+    }
+  });
+
   it('creates an owned tenant-scoped draft with policy snapshots and an author timeline', async () => {
     const created = await submissions.createDraft(
       journalId,

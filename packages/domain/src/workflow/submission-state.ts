@@ -74,3 +74,32 @@ const allowedTransitions: Readonly<Record<SubmissionState, readonly SubmissionSt
 export function canTransitionSubmission(from: SubmissionState, to: SubmissionState): boolean {
   return allowedTransitions[from].includes(to);
 }
+
+export const authorProgressPhases = ['WAITING', 'REVIEWED', 'EVALUATION', 'ACCEPTED'] as const;
+export type AuthorProgressPhase = (typeof authorProgressPhases)[number];
+
+export const authorProgressLabels: Record<AuthorProgressPhase, string> = {
+  WAITING: 'Waiting',
+  REVIEWED: 'Reviewed',
+  EVALUATION: 'Evaluation',
+  ACCEPTED: 'Accepted',
+};
+
+const authorPhaseByState: Partial<Record<SubmissionState, AuthorProgressPhase>> = {
+  SUBMITTED: 'WAITING',
+  INITIAL_SCREENING: 'WAITING',
+  PRE_REVIEW_CORRECTION_REQUESTED: 'WAITING',
+  EDITOR_ASSIGNED: 'REVIEWED',
+  UNDER_REVIEW: 'REVIEWED',
+  REVISION_REQUIRED: 'EVALUATION',
+  RESUBMITTED: 'EVALUATION',
+  ACCEPTED: 'ACCEPTED',
+  COPYEDITING: 'ACCEPTED',
+  PRODUCTION: 'ACCEPTED',
+  SCHEDULED: 'ACCEPTED',
+  PUBLISHED: 'ACCEPTED',
+};
+
+export function getAuthorProgressPhase(state: SubmissionState): AuthorProgressPhase | null {
+  return authorPhaseByState[state] ?? null;
+}

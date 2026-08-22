@@ -24,6 +24,7 @@ export function PublicHeader() {
         <nav aria-label="Navigasi utama">
           <a href="/journals">Jurnal</a>
           <a href="/search">Pencarian</a>
+          <a href="/register">Kirim naskah</a>
           <a href="/login">Masuk</a>
         </nav>
       </div>

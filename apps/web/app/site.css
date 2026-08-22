@@ -1428,3 +1428,316 @@ footer {
     padding: var(--space-4);
   }
 }
+
+/* Public publishing experience */
+.home-page {
+  max-width: none;
+  padding: 0;
+}
+
+.home-hero,
+.home-section,
+.publishing-principles {
+  width: min(1280px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.7fr);
+  gap: clamp(48px, 8vw, 112px);
+  align-items: center;
+  min-height: 620px;
+  padding-block: 80px;
+}
+
+.home-hero-copy h1 {
+  max-width: 900px;
+}
+
+.workflow-preview {
+  padding: 32px;
+  border: 1px solid var(--color-border-strong);
+  border-top: 5px solid var(--color-gold);
+  background: var(--color-surface);
+}
+
+.workflow-preview ol,
+.auth-context ol {
+  display: grid;
+  gap: 0;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workflow-preview li,
+.auth-context li {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 16px;
+  padding-block: 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.workflow-preview li > span,
+.auth-context li > span {
+  color: var(--color-gold);
+  font-family: var(--font-serif), serif;
+  font-size: 1.2rem;
+}
+
+.workflow-preview li div,
+.auth-context li div {
+  display: grid;
+  gap: 4px;
+}
+
+.workflow-preview small,
+.auth-context small {
+  color: var(--color-ink-muted);
+  line-height: 1.45;
+}
+
+.home-section {
+  padding-block: 72px;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.home-section h2,
+.publishing-principles strong {
+  margin: 6px 0;
+}
+
+.home-article-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 32px;
+  border-top: 1px solid var(--color-border-strong);
+  border-left: 1px solid var(--color-border);
+}
+
+.home-article-grid article {
+  min-height: 270px;
+  padding: 28px;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.home-article-grid h3,
+.journal-preview-list h3 {
+  font-family: var(--font-serif), serif;
+  line-height: 1.35;
+}
+
+.home-article-grid h3 a,
+.journal-preview-list h3 a {
+  color: var(--color-brand);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.home-article-grid article > p:not(.article-context),
+.home-article-grid time,
+.article-context,
+.journal-preview-list p {
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.article-context {
+  color: var(--color-brand);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.home-journals {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.55fr) minmax(0, 1fr);
+  gap: 72px;
+}
+
+.journal-preview-list article {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 24px;
+  align-items: start;
+  padding-block: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.journal-preview-list article > span {
+  color: var(--color-gold);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.journal-preview-list article > strong {
+  color: var(--color-brand);
+  font-size: 0.8rem;
+}
+
+.publishing-principles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 80px;
+  border-top: 4px solid var(--color-brand);
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.publishing-principles div {
+  display: grid;
+  gap: 8px;
+  padding: 28px;
+  border-right: 1px solid var(--color-border);
+}
+
+.publishing-principles div:last-child {
+  border-right: 0;
+}
+
+.publishing-principles span {
+  color: var(--color-ink-muted);
+  line-height: 1.55;
+}
+
+.auth-experience {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.85fr) minmax(380px, 0.7fr);
+  max-width: 1120px;
+  gap: 0;
+  align-items: stretch;
+}
+
+.auth-context {
+  padding: 48px;
+  border: 1px solid var(--color-brand);
+  background: var(--color-brand);
+  color: var(--color-ink-inverse);
+}
+
+.auth-context .brand-lockup {
+  padding: 12px;
+  background: var(--color-surface);
+}
+
+.auth-context .eyebrow,
+.auth-context li > span {
+  color: var(--color-gold);
+}
+
+.auth-context > p:not(.eyebrow),
+.auth-context small {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.65;
+}
+
+.auth-context h1 {
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+}
+
+.auth-experience .auth-panel {
+  max-width: none;
+  padding: 48px;
+}
+
+.auth-panel h2 {
+  margin-block: 16px;
+  font-family: var(--font-serif), serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+}
+
+.auth-switch {
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.author-progress-guide {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.6fr) 1fr;
+  gap: 32px;
+  align-items: end;
+  margin-block: 36px;
+  padding: 28px;
+  border-top: 4px solid var(--color-gold);
+  background: var(--color-surface);
+}
+
+.author-progress-guide ol {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.author-progress-guide li {
+  display: grid;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 1px solid var(--color-border-strong);
+}
+
+.author-progress-guide li span {
+  color: var(--color-gold);
+  font-family: var(--font-serif), serif;
+}
+
+.submission-public-status {
+  display: block;
+  color: var(--color-brand);
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .home-hero,
+  .home-journals,
+  .auth-experience,
+  .author-progress-guide {
+    grid-template-columns: 1fr;
+  }
+
+  .home-article-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .publishing-principles {
+    grid-template-columns: 1fr;
+  }
+
+  .publishing-principles div {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+}
+
+@media (max-width: 640px) {
+  .home-hero,
+  .home-section,
+  .publishing-principles {
+    width: calc(100% - 32px);
+  }
+
+  .home-hero {
+    min-height: auto;
+    padding-block: 56px;
+  }
+
+  .home-article-grid,
+  .author-progress-guide ol {
+    grid-template-columns: 1fr;
+  }
+
+  .journal-preview-list article {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .auth-context,
+  .auth-experience .auth-panel {
+    padding: 28px;
+  }
+}

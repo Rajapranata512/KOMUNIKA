@@ -9,3 +9,8 @@ test('login retains its branded visual baseline', async ({ page }) => {
   await page.goto('/login');
   await expect(page).toHaveScreenshot('login.png', { fullPage: true, caret: 'initial' });
 });
+
+test('registration explains the author journey in its visual baseline', async ({ page }) => {
+  await page.goto('/register');
+  await expect(page).toHaveScreenshot('register.png', { fullPage: true, caret: 'initial' });
+});

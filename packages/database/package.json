@@ -15,6 +15,7 @@
     "db:validate": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma validate",
     "db:migrate:test": "cross-env DATABASE_URL=postgresql://validation:validation@localhost:5432/validation prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script",
     "bootstrap:admin": "tsx src/bootstrap-admin.ts",
+    "seed:demo": "tsx src/seed-demo.ts",
     "db:generate": "prisma generate"
   },
   "dependencies": {

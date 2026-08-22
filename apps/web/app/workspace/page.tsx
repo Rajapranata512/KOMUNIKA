@@ -1,12 +1,19 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import {
+  authorProgressLabels,
+  authorProgressPhases,
+  getAuthorProgressPhase,
+  submissionStateLabels,
+  type SubmissionState,
+} from '@aksara/domain';
 
 const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3001/api/v1';
 
 interface SubmissionSummary {
   id: string;
-  state: string;
+  state: SubmissionState;
   title: string;
   submittedAt: string | null;
   updatedAt: string;
@@ -65,6 +72,20 @@ export default async function WorkspacePage() {
           </Link>
         </div>
       </header>
+      <section className={'author-progress-guide'} aria-labelledby={'progress-guide-heading'}>
+        <div>
+          <p className={'eyebrow'}>Progres naskah</p>
+          <h2 id={'progress-guide-heading'}>Empat tahap yang mudah dipantau</h2>
+        </div>
+        <ol>
+          {authorProgressPhases.map((phase, index) => (
+            <li key={phase}>
+              <span>{index + 1}</span>
+              <strong>{authorProgressLabels[phase]}</strong>
+            </li>
+          ))}
+        </ol>
+      </section>
       <section className="admin-next" aria-labelledby="submission-list-heading">
         <h2 id="submission-list-heading">Draf dan submission aktif</h2>
         {submissions.length ? (
@@ -88,7 +109,14 @@ export default async function WorkspacePage() {
                       <br />
                       <small>{submission.articleType.title}</small>
                     </td>
-                    <td>{submission.state}</td>
+                    <td>
+                      <span className={'submission-public-status'}>
+                        {getAuthorProgressPhase(submission.state)
+                          ? authorProgressLabels[getAuthorProgressPhase(submission.state)!]
+                          : submissionStateLabels[submission.state]}
+                      </span>
+                      <small>{submissionStateLabels[submission.state]}</small>
+                    </td>
                     <td>{new Date(submission.updatedAt).toLocaleString('id-ID')}</td>
                     <td>
                       <Link href={`/workspace/submissions/${submission.id}`}>Buka</Link>

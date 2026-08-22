@@ -31,7 +31,8 @@
     "verify:staging": "tsx infra/scripts/verify-staging-readiness.ts",
     "test:staging-smoke": "tsx infra/scripts/verify-staging-readiness.ts && node infra/scripts/staging-smoke.mjs",
     "db:validate": "pnpm --filter @aksara/database db:validate",
-    "db:migrate:test": "pnpm --filter @aksara/database db:migrate:test"
+    "db:migrate:test": "pnpm --filter @aksara/database db:migrate:test",
+    "db:seed:demo": "pnpm --filter @aksara/database seed:demo"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1114.0",

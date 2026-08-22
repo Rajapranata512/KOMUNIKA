@@ -12,9 +12,7 @@ export async function POST(request: NextRequest) {
   });
   if (!response.ok)
     return NextResponse.redirect(new URL('/register?error=invalid', request.url), 303);
-  const result = (await response.json()) as { developmentToken?: string };
-  const destination = result.developmentToken
-    ? `/verify-email?token=${encodeURIComponent(result.developmentToken)}`
-    : '/verify-email';
+  await response.json();
+  const destination = '/login?registered=1';
   return NextResponse.redirect(new URL(destination, request.url), 303);
 }

@@ -517,6 +517,8 @@ Composition:
 5. Clear publisher trust and policy links
 6. Footer with contact, privacy, accessibility, and status links
 
+The ANG homepage may use an asymmetric editorial hero paired with a compact four-stage manuscript-process panel, followed by a bordered article grid, a restrained journal list, and a three-column publishing-principles strip. Use real database records, square editorial borders, navy/gold hierarchy, and generous whitespace; do not introduce gradients, inflated platform metrics, or decorative dashboard cards.
+
 Avoid a startup-style hero with meaningless metrics or decorative gradient art.
 
 ## 9.2 Journal landing page
@@ -546,6 +548,7 @@ The journal cover may appear, but it should not dominate usability.
 - Show issue title, volume, number, date, cover, and article count.
 - Support accessible filtering.
 - Do not use an infinite masonry grid.
+- For the planned cadence, present one volume per year with three numbered issues and up to ten articles in each issue. Do not label individual articles as journals.
 
 ### Search and discovery
 
@@ -553,7 +556,7 @@ The journal cover may appear, but it should not dominate usability.
 - Present journal, section, article-type, issue, and year filters as a compact labeled fieldset.
 - Store active search and filter state in the URL so results can be shared and restored.
 - Use journal-aware option labels when slugs or names may repeat across tenants.
-- Show a truthful empty state when no approved public article matches; never substitute demo records.
+- Show a truthful empty state when no approved public article matches. Explicitly fictional database seed records may appear only in a clearly labeled demonstration journal; never inject fallback cards that are not returned by the API.
 
 ## 9.4 Issue page
 
@@ -1121,6 +1124,8 @@ Do not build the entire component library before implementing real vertical slic
 ---
 
 ## 20. Changelog
+
+- **2026-08-22:** Added the responsive asymmetric editorial homepage, database-backed article/journal presentation, author-journey registration panel, four-stage author progress summary, and explicit visual conventions for the three-issue fictional demonstration volume.
 
 - **2026-08-22:** Defined and implemented the responsive platform-administration CMS shell with ANG navy-gold navigation, factual module cards, a compact account utility bar, mobile disclosure navigation, and sticky journal-configuration anchors.
 

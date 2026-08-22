@@ -207,7 +207,6 @@ export class AuthService {
       !user ||
       !passwordMatches ||
       user.disabledAt ||
-      (!user.emailVerifiedAt && user.platformRole !== 'PLATFORM_ADMIN') ||
       (adminOnly && user.platformRole !== 'PLATFORM_ADMIN')
     ) {
       await database.auditEvent.create({

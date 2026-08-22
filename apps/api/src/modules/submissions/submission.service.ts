@@ -194,7 +194,9 @@ export class SubmissionService {
       }),
       database.user.findUnique({ where: { id: userId } }),
     ]);
-    if (!journal || !user?.emailVerifiedAt || user.disabledAt) return null;
+    // Unverified users may explore the author workspace and prepare a draft.
+    // Finalization remains protected by EMAIL_VERIFICATION_REQUIRED below.
+    if (!journal || !user || user.disabledAt) return null;
 
     const names = (user.fullName ?? user.email.split('@')[0] ?? 'Author').trim().split(/\s+/);
     const familyName = names.length > 1 ? (names.pop() ?? '') : '';

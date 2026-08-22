@@ -102,9 +102,24 @@ describe('general identity lifecycle integration', () => {
         where: { userId },
       });
       expect(storedVerification.tokenHash).not.toContain(registration.developmentToken);
-      await expect(
-        auth.login(email, initialPassword, `integration-${randomUUID()}`),
-      ).resolves.toBeNull();
+      const unverifiedLogin = await auth.login(
+        email,
+        initialPassword,
+        `integration-${randomUUID()}`,
+      );
+      expect(unverifiedLogin).not.toBeNull();
+      if (unverifiedLogin) {
+        await expect(auth.authenticateUser(unverifiedLogin.sessionToken)).resolves.toMatchObject({
+          user: { emailVerified: false },
+        });
+        await expect(
+          auth.logout(
+            unverifiedLogin.sessionToken,
+            unverifiedLogin.csrfToken,
+            `integration-${randomUUID()}`,
+          ),
+        ).resolves.toBe(true);
+      }
       await expect(
         auth.verifyEmail(registration.developmentToken, `integration-${randomUUID()}`),
       ).resolves.toBe(true);

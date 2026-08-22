@@ -1,11 +1,11 @@
 import { BrandMark } from '../../components/public-chrome';
 
 interface LoginPageProps {
-  searchParams: Promise<{ error?: string; verified?: string; reset?: string }>;
+  searchParams: Promise<{ error?: string; verified?: string; reset?: string; registered?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error, verified, reset } = await searchParams;
+  const { error, verified, reset, registered } = await searchParams;
   return (
     <main id="main-content" className="auth-shell">
       <section className="auth-panel" aria-labelledby="login-heading">
@@ -28,6 +28,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {reset ? (
           <div className={'form-success'} role={'status'}>
             Password berhasil diperbarui. Silakan masuk.
+          </div>
+        ) : null}
+        {registered ? (
+          <div className={'form-success'} role={'status'}>
+            Akun berhasil dibuat. Anda dapat masuk dan menyiapkan draf sekarang; verifikasi email
+            diperlukan sebelum mengirim naskah.
           </div>
         ) : null}
         <form action="/auth/login" method="post" className="auth-form">
