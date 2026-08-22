@@ -136,6 +136,16 @@ export default async function JournalSettingsPage({
         </p>
       ) : null}
 
+      <nav className={'journal-config-nav'} aria-label={'Bagian konfigurasi jurnal'}>
+        <a href={'#identity-heading'}>Identitas</a>
+        <a href={'#sections-heading'}>Seksi</a>
+        <a href={'#article-types-heading'}>Jenis artikel</a>
+        <a href={'#checklist-heading'}>Checklist</a>
+        <a href={'#declarations-heading'}>Deklarasi</a>
+        <a href={'#templates-heading'}>Template</a>
+        <a href={'#review-forms-heading'}>Form review</a>
+      </nav>
+
       <section className={'admin-next'} aria-labelledby={'identity-heading'}>
         <h2 id={'identity-heading'}>Identitas dan kebijakan review</h2>
         <form action={'/auth/journal-config'} method={'post'} className={'auth-form'}>

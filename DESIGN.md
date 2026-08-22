@@ -3,7 +3,7 @@
 - **Document status:** Approved design baseline
 - **Applies to:** Public publishing site, author workspace, reviewer workspace, editorial workspace, and administration
 - **Design objective:** Credible scholarly publishing with modern operational clarity and a restrained ANG publisher identity
-- **Last updated:** 2026-08-20
+- **Last updated:** 2026-08-22
 
 ---
 
@@ -350,6 +350,17 @@ Journal manager adds:
 - Journal Settings
 
 Platform admin uses a clearly separated administration area to avoid accidental context confusion.
+
+Platform administration uses a restrained CMS shell:
+
+- a persistent 244px ANG navy side rail on desktop, replaced by an accessible disclosure menu below the desktop breakpoint;
+- a compact identity and utility header that exposes the signed-in administrator, public-site exit, and logout;
+- top-level navigation only for implemented modules: Overview, Journals & CMS, Users, and Security;
+- task-oriented module cards on the overview instead of vanity analytics;
+- sticky in-page navigation for long journal-configuration forms, including identity, sections, article types, checklist, declarations, templates, and review forms;
+- one visible active-navigation state using both structure and the gold accent, never color alone.
+
+Do not mix platform administration with author or editorial navigation. Do not display links for operational modules that have no working route and server-authorized behavior.
 
 ## 7.3 Breadcrumbs
 
@@ -1110,6 +1121,8 @@ Do not build the entire component library before implementing real vertical slic
 ---
 
 ## 20. Changelog
+
+- **2026-08-22:** Defined and implemented the responsive platform-administration CMS shell with ANG navy-gold navigation, factual module cards, a compact account utility bar, mobile disclosure navigation, and sticky journal-configuration anchors.
 
 - **2026-08-20:** Added URL-preserved faceted public-search behavior, truthful database-backed empty states, and the scanned/approved optional issue-cover workflow and rendering convention.
 
