@@ -17,8 +17,11 @@ const serif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: 'Aksara Journal Platform',
-  description: 'Trusted infrastructure for scholarly journal publishing.',
+  title: {
+    default: 'Aksara Nusa Global Publishing',
+    template: '%s | ANG Publishing',
+  },
+  description: 'Infrastruktur penerbitan jurnal ilmiah Aksara Nusa Global Publishing.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

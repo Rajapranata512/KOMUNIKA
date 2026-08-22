@@ -3,6 +3,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "APP_ENV",
+        "APP_BASE_URL",
+        "API_BASE_URL",
+        "EMAIL_DELIVERY_MODE",
+        "VERCEL_AUTOMATION_BYPASS_SECRET"
+      ],
       "outputs": [".next/**", "dist/**", "!.next/cache/**"]
     },
     "dev": {
@@ -10,16 +17,38 @@
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^build", "^lint"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^build", "^typecheck"]
     },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
     "test:integration": {
+      "dependsOn": ["^build"],
+      "env": [
+        "ANTIVIRUS_HOST",
+        "ANTIVIRUS_PORT",
+        "API_BASE_URL",
+        "APP_BASE_URL",
+        "APP_ENV",
+        "CSRF_SECRET",
+        "DATABASE_URL",
+        "EMAIL_DELIVERY_MODE",
+        "FILE_SCAN_MODE",
+        "MFA_ENCRYPTION_KEY",
+        "OBJECT_STORAGE_ACCESS_KEY",
+        "OBJECT_STORAGE_BUCKET_PRIVATE",
+        "OBJECT_STORAGE_BUCKET_PUBLIC",
+        "OBJECT_STORAGE_ENDPOINT",
+        "OBJECT_STORAGE_REGION",
+        "OBJECT_STORAGE_SECRET_KEY",
+        "PUBLICATION_SCHEDULER_MODE",
+        "REDIS_URL",
+        "SESSION_SECRET"
+      ],
       "cache": false
     },
     "test:e2e": {

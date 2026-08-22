@@ -43,11 +43,6 @@ export default async function AdminPage() {
           <h1>Ringkasan sistem</h1>
           <p>Masuk sebagai {overview.administrator.email}</p>
         </div>
-        <form action="/auth/logout" method="post">
-          <button className="secondary-button" type="submit">
-            Keluar
-          </button>
-        </form>
       </header>
       <section aria-labelledby="system-state-heading">
         <h2 id="system-state-heading">Status faktual</h2>
@@ -70,12 +65,69 @@ export default async function AdminPage() {
           </div>
         </dl>
       </section>
-      <section className="admin-next" aria-labelledby="admin-next-heading">
-        <h2 id="admin-next-heading">Konfigurasi berikutnya</h2>
-        <p>
-          <a href={'/admin/journals'}>Kelola jurnal</a> untuk identitas publik, keanggotaan, seksi,
-          jenis artikel, checklist, deklarasi, dan template.
-        </p>
+      <section aria-labelledby="cms-modules-heading">
+        <div className="section-heading cms-section-heading">
+          <div>
+            <p className="eyebrow">Modul CMS</p>
+            <h2 id="cms-modules-heading">Kelola kebutuhan penerbitan</h2>
+          </div>
+          <p>Semua tindakan tetap dibatasi oleh role dan tenant.</p>
+        </div>
+        <div className="cms-module-grid">
+          <article className="cms-module-card">
+            <span className="cms-module-number" aria-hidden="true">
+              01
+            </span>
+            <div>
+              <h3>Jurnal dan konten</h3>
+              <p>
+                Identitas jurnal, tim editorial, seksi, jenis artikel, checklist, dan kebijakan.
+              </p>
+              <ul>
+                <li>Template dan deklarasi berversi</li>
+                <li>Form peer review per seksi</li>
+                <li>Status publikasi dan pengajuan</li>
+              </ul>
+            </div>
+            <a className="primary-action" href="/admin/journals">
+              Buka jurnal & CMS
+            </a>
+          </article>
+          <article className="cms-module-card">
+            <span className="cms-module-number" aria-hidden="true">
+              02
+            </span>
+            <div>
+              <h3>Pengguna dan akses</h3>
+              <p>Tinjau akun, verifikasi, keanggotaan jurnal, sesi, dan status akses pengguna.</p>
+              <ul>
+                <li>Pencarian pengguna</li>
+                <li>Aktifkan atau nonaktifkan akun</li>
+                <li>Perlindungan administrator terakhir</li>
+              </ul>
+            </div>
+            <a className="secondary-action" href="/admin/users">
+              Kelola pengguna
+            </a>
+          </article>
+          <article className="cms-module-card">
+            <span className="cms-module-number" aria-hidden="true">
+              03
+            </span>
+            <div>
+              <h3>Keamanan</h3>
+              <p>Lindungi operasi istimewa dan tinjau sesi administrator yang masih aktif.</p>
+              <ul>
+                <li>Setup autentikator TOTP</li>
+                <li>Cabut sesi aktif</li>
+                <li>Audit login dan perubahan</li>
+              </ul>
+            </div>
+            <a className="secondary-action" href="/admin/security">
+              Atur keamanan
+            </a>
+          </article>
+        </div>
       </section>
       <section className={'admin-next'} aria-labelledby={'sessions-heading'}>
         <h2 id={'sessions-heading'}>Sesi aktif</h2>
@@ -108,11 +160,6 @@ export default async function AdminPage() {
           <p>Tidak ada sesi aktif.</p>
         )}
       </section>
-      <p className={'actions'}>
-        <a className={'primary-action'} href={'/admin/journals'}>
-          Kelola jurnal
-        </a>
-      </p>
     </main>
   );
 }

@@ -5,7 +5,35 @@ interface ForgotPasswordPageProps {
 export default async function ForgotPasswordPage({ searchParams }: ForgotPasswordPageProps) {
   const { token, error } = await searchParams;
   return (
-    <main id={'main-content'} className={'auth-shell'}>
+    <main id={'main-content'} className={'auth-shell auth-experience'}>
+      <IdentityContext
+        eyebrow={'Pemulihan akun'}
+        heading={
+          token
+            ? 'Tetapkan ulang akses Anda dengan aman.'
+            : 'Kembali ke ruang kerja tanpa membuka informasi akun.'
+        }
+        description={
+          token
+            ? 'Password baru akan menggantikan kredensial lama dan mengakhiri sesi aktif lainnya.'
+            : 'Proses pemulihan dirancang untuk membantu pemilik akun tanpa mengungkap apakah sebuah email terdaftar.'
+        }
+        headingId={'reset-context-heading'}
+        items={[
+          {
+            title: 'Respons privat',
+            detail: 'Sistem memberikan respons yang sama untuk setiap alamat email.',
+          },
+          {
+            title: 'Token sekali pakai',
+            detail: 'Tautan pemulihan memiliki masa berlaku dan tidak dapat digunakan kembali.',
+          },
+          {
+            title: 'Sesi dilindungi',
+            detail: 'Perubahan password mencabut sesi aktif agar akses lama tidak bertahan.',
+          },
+        ]}
+      />
       <section className={'auth-panel'} aria-labelledby={'reset-heading'}>
         <p className={'eyebrow'}>Keamanan akun</p>
         <h1 id={'reset-heading'}>{token ? 'Buat password baru' : 'Reset password'}</h1>
@@ -49,3 +77,4 @@ export default async function ForgotPasswordPage({ searchParams }: ForgotPasswor
     </main>
   );
 }
+import { IdentityContext } from '../../components/identity-context';

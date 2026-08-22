@@ -144,6 +144,55 @@ describe('journal isolation integration', () => {
     expect(articleType).not.toBe('conflict');
     expect(articleType).not.toBe('invalid-section');
 
+    const invalidReviewForm = await service.createReviewForm(
+      secondJournalId,
+      {
+        name: 'Form reviewer',
+        sectionId: section.id,
+        questions: [{ prompt: 'Pertanyaan lintas tenant', type: 'LONG_TEXT', required: true }],
+      },
+      secondUserId,
+      `journal-config-${suffix}`,
+    );
+    expect(invalidReviewForm).toBe('invalid-section');
+    const firstReviewForm = await service.createReviewForm(
+      firstJournalId,
+      {
+        name: 'Form reviewer',
+        sectionId: section.id,
+        questions: [
+          { prompt: 'Apakah metode dapat direplikasi?', type: 'LONG_TEXT', required: true },
+        ],
+      },
+      firstUserId,
+      `journal-config-${suffix}`,
+    );
+    expect(typeof firstReviewForm).toBe('object');
+    const secondReviewForm = await service.createReviewForm(
+      firstJournalId,
+      {
+        name: 'Form reviewer',
+        sectionId: section.id,
+        questions: [
+          {
+            prompt: 'Apakah metode dapat direplikasi dan divalidasi?',
+            type: 'LONG_TEXT',
+            required: true,
+          },
+        ],
+      },
+      firstUserId,
+      `journal-config-${suffix}`,
+    );
+    expect(typeof secondReviewForm).toBe('object');
+    if (typeof firstReviewForm === 'string' || typeof secondReviewForm === 'string')
+      throw new Error('review forms were not created');
+    expect(firstReviewForm.version).toBe(1);
+    expect(secondReviewForm.version).toBe(2);
+    expect(
+      await database.reviewForm.findUniqueOrThrow({ where: { id: firstReviewForm.id } }),
+    ).toMatchObject({ isActive: false });
+
     await service.createChecklistItem(
       firstJournalId,
       { label: 'Naskah mengikuti template jurnal dan belum diterbitkan di tempat lain.' },

@@ -10,6 +10,7 @@ export const journalPermissions = [
   'review.manage',
   'decision.manage',
   'production.manage',
+  'publication.publish',
 ] as const;
 
 export type JournalPermission = (typeof journalPermissions)[number];
@@ -31,6 +32,7 @@ const rolePermissions: Record<JournalRole, readonly JournalPermission[]> = {
     'review.manage',
     'decision.manage',
     'production.manage',
+    'publication.publish',
   ],
   JOURNAL_MANAGER: [
     'journal.read_private',

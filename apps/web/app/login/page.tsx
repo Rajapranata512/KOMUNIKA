@@ -1,17 +1,41 @@
+import { IdentityContext } from '../../components/identity-context';
+
 interface LoginPageProps {
-  searchParams: Promise<{ error?: string; verified?: string; reset?: string }>;
+  searchParams: Promise<{ error?: string; verified?: string; reset?: string; registered?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error, verified, reset } = await searchParams;
+  const { error, verified, reset, registered } = await searchParams;
   return (
-    <main id="main-content" className="auth-shell">
-      <section className="auth-panel" aria-labelledby="login-heading">
-        <p className="eyebrow">Akun Aksara</p>
-        <h1 id="login-heading">Masuk</h1>
-        <p className="lede">Gunakan email dan password akun Anda.</p>
+    <main id={'main-content'} className={'auth-shell auth-experience'}>
+      <IdentityContext
+        eyebrow={'Portal penerbitan ilmiah'}
+        heading={'Kembali ke ruang kerja editorial Anda.'}
+        description={
+          'Satu akun menghubungkan penulis, reviewer, editor, dan pengelola jurnal ke ruang kerja sesuai izin masing-masing.'
+        }
+        headingId={'login-context-heading'}
+        items={[
+          {
+            title: 'Satu pintu masuk',
+            detail: 'Sistem mengarahkan Anda ke workspace berdasarkan peran dan penugasan.',
+          },
+          {
+            title: 'Progres tetap terlihat',
+            detail: 'Pantau Waiting, Reviewed, Evaluation, dan Accepted dari akun penulis.',
+          },
+          {
+            title: 'Akses terjaga',
+            detail: 'Naskah privat dan keputusan editorial dibatasi berdasarkan otorisasi.',
+          },
+        ]}
+      />
+      <section className={'auth-panel'} aria-labelledby={'login-heading'}>
+        <p className={'eyebrow'}>Akun ANG Publishing</p>
+        <h1 id={'login-heading'}>Masuk</h1>
+        <p className={'lede'}>Gunakan email dan password akun Anda untuk melanjutkan.</p>
         {error ? (
-          <div className="form-error" role="alert">
+          <div className={'form-error'} role={'alert'}>
             Email atau password tidak valid. Periksa kembali kredensial Anda.
           </div>
         ) : null}
@@ -25,24 +49,37 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Password berhasil diperbarui. Silakan masuk.
           </div>
         ) : null}
-        <form action="/auth/login" method="post" className="auth-form">
-          <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" autoComplete="username" required />
-          <label htmlFor="password">Password</label>
+        {registered ? (
+          <div className={'form-success'} role={'status'}>
+            Akun berhasil dibuat. Anda dapat masuk dan menyiapkan draf sekarang; verifikasi email
+            diperlukan sebelum mengirim naskah.
+          </div>
+        ) : null}
+        <form action={'/auth/login'} method={'post'} className={'auth-form'}>
+          <label htmlFor={'email'}>Email</label>
           <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
+            id={'email'}
+            name={'email'}
+            type={'email'}
+            autoComplete={'username'}
+            placeholder={'nama@institusi.ac.id'}
             required
           />
-          <button type="submit">Masuk</button>
+          <label htmlFor={'password'}>Password</label>
+          <input
+            id={'password'}
+            name={'password'}
+            type={'password'}
+            autoComplete={'current-password'}
+            required
+          />
+          <button type={'submit'}>Masuk ke workspace</button>
         </form>
         <p className={'auth-links'}>
           <a href={'/register'}>Buat akun</a>
           <a href={'/forgot-password'}>Lupa password?</a>
         </p>
-        <a href="/">Kembali ke situs publik</a>
+        <a href={'/'}>Kembali ke situs publik</a>
       </section>
     </main>
   );

@@ -1,17 +1,17 @@
 # PRD.md — Scholarly Journal Publishing Platform
 
-- **Working product name:** Aksara Journal Platform
+- **Working product name:** Aksara Nusa Global Publishing
 - **Document status:** Approved baseline for implementation
 - **Product type:** Multi-journal scholarly submission, peer-review, editorial, and publishing platform
 - **Initial market:** Universities, research institutions, associations, and independent scholarly journal publishers in Indonesia
 - **Default language:** Indonesian, with English-ready architecture
-- **Last updated:** 2026-08-19
+- **Last updated:** 2026-08-22
 
 ---
 
 ## 1. Product Definition
 
-Aksara Journal Platform is a web application for managing the full scholarly publishing lifecycle:
+Aksara Nusa Global Publishing is a web application for managing the full scholarly publishing lifecycle:
 
 1. journal setup;
 2. author submission;
@@ -130,8 +130,8 @@ Citation analytics, author reputation scoring, APC payments, and AI-assisted too
 
 ### Identity and access
 
-- Email/password registration and login
-- Email verification
+- Email/password registration and login, including workspace access before verification
+- Email verification required before final manuscript submission, while unverified users may prepare drafts
 - Password reset
 - Secure session management
 - User profile with name, affiliation, country, areas of expertise, and optional ORCID iD
@@ -532,6 +532,8 @@ Identifiers use `FR-<domain>-<number>`.
 - **FR-IAM-005:** Revoke sessions from profile and administration.
 - **FR-IAM-006:** Record security-relevant authentication events.
 - **FR-IAM-007:** Support ORCID OAuth in Release 1.1.
+- **FR-IAM-008:** Allow platform administrators to search, suspend, and restore user accounts with self-lockout and last-admin protection, session revocation, and immutable audit events.
+- **FR-IAM-009:** Protect platform-administrator login with optional TOTP MFA using encrypted-at-rest secrets, short-lived one-time challenges, bounded verification attempts, and audited setup and authentication events.
 
 ### 10.2 Journal management
 
@@ -823,7 +825,7 @@ This choice minimizes operational cost and cross-service coordination while pres
 - Docker Compose
 - PostgreSQL
 - Redis
-- MinIO or compatible local object storage
+- SeaweedFS or compatible maintained local S3 object storage
 - Mailpit or equivalent local email capture
 - Optional ClamAV container for file scanning
 
@@ -1305,8 +1307,10 @@ APP_BASE_URL
 API_BASE_URL
 DATABASE_URL
 REDIS_URL
+FILE_SCAN_MODE
 SESSION_SECRET
 CSRF_SECRET
+MFA_ENCRYPTION_KEY
 OBJECT_STORAGE_ENDPOINT
 OBJECT_STORAGE_REGION
 OBJECT_STORAGE_BUCKET_PRIVATE
@@ -1350,6 +1354,8 @@ Recommended fictional seed journal:
 - **Abbreviation:** JCDT
 - **Scope:** data science, information systems, applied statistics, and responsible computing
 - **Indexing status:** Not claimed
+
+The canonical demonstration cadence is one annual volume with three numbered issues per year and ten fictional articles per issue. Demo journals, people, institutions, licenses, and articles must remain explicitly labeled as fictional, use reserved invalid email/domain values, and be created by an idempotent seed command.
 
 ---
 
@@ -1432,14 +1438,15 @@ This tracker records verified implementation state. Requirements remain authorit
 
 | Phase | Status | Verified scope | Remaining dependency |
 | --- | --- | --- | --- |
-| Phase 0 — Foundation | In progress | Monorepo, workspace scripts, shared domain and design-token packages, NestJS and Next.js foundations, Prisma schema boundary, PostgreSQL 18 native local service, Docker Compose definition, CI workflow, unit and database integration tests, typecheck, lint, schema validation, and production build | Docker image downloads remain unavailable, so Redis, MinIO, and Mailpit local services are not running; E2E, accessibility, and visual test suites are not implemented |
-| Phase 1 — Identity and journal configuration | In progress | One canonical login for general and platform-admin accounts with role-based routing; registration, verification, reset, and session administration; Argon2id passwords and hashed opaque tokens; profile fields for name, affiliation, country, expertise, user-entered unverified ORCID, locale, and timezone; profile ownership, CSRF, validation, and audit; database-backed journal creation and configuration; published/draft visibility; multi-role journal memberships; centralized permission policy; server-side journal-scoped management checks; cross-journal isolation tests; database-backed public journal directory and detail page; journal sections, article types, submission checklists, versioned declarations, and templates with tenant-scoped configuration-editing UI; deterministic PostgreSQL migrations; verified local admin/public smoke tests; unit tests, integration tests, typecheck, migration validation, and production build pass | Real transactional-email queue delivery, MFA for privileged users, and complete E2E/security tests remain |
-| Phase 2 — Author submission | Not started | Submission state vocabulary and basic transition tests exist | Complete Phase 1, then implement the author submission vertical slice |
-| Phase 3 — Editorial screening | Not started | No functional implementation | Complete Phase 2 |
-| Phase 4 — Peer review | Not started | No functional implementation | Complete Phase 3 |
-| Phase 5 — Decisions and revisions | Not started | No functional implementation | Complete Phase 4 |
-| Phase 6 — Production and publication | Not started | No functional implementation | Complete Phase 5 |
-| Phase 7 — Hardening | Not started | Baseline quality scripts and CI exist | Complete all core workflow phases and critical E2E journeys |
+| User preview and demonstration experience | Completed | General accounts may log in and prepare tenant-scoped drafts before verification while final submission retains the server-side verification gate; the author dashboard summarizes detailed workflow states as Waiting, Reviewed, Evaluation, and Accepted; login, registration, password recovery, email verification, MFA challenge, and the database-backed homepage use the responsive ANG editorial design with one canonical identity-context component; the idempotent seed produced one explicitly fictional annual volume with three issues and ten articles per issue in local and production databases; authentication/submission integration tests, a controller-boundary regression test, typecheck, production build, seven-route axe checks, five visual baselines, all seven E2E journeys, READY API/web production deployments, production API/content smokes with exactly 3 issues and 30 articles, and a cleaned production UAT covering unverified registration, login, draft creation, author visibility, and HTTP 422 finalization denial pass | None |
+| Phase 0 — Foundation | Blocked | Monorepo, workspace scripts, shared domain and design-token packages, NestJS and Next.js foundations, Prisma schema boundary, PostgreSQL 18 native local service, Docker Compose definition with loopback-bound healthy Redis, SeaweedFS 4.29, Mailpit, and ClamAV plus idempotent private/public bucket bootstrap, CI workflow with SHA-pinned actions and dependency, secret, configuration, and service-image scan gates, locally verified Git-history/worktree secret scans and current service-image critical-vulnerability matrix, passing GitHub pull-request CI runs covering quality, security, service-image, migration, integration, browser E2E, and accessibility gates, unit and database integration tests, typecheck, lint, schema validation, production build, separate current Vercel frontend and NestJS API production deployments, web-to-API environment wiring, public API liveness plus real PostgreSQL readiness, fail-closed staging environment validation and read-only smoke automation, deterministic Prisma Client generation during clean installs, responsive Aksara Nusa Global Publishing lockup with shared navy-gold theme tokens, public `aksara-nusa-global.vercel.app` production domain, a Singapore-region Neon production database with all 16 committed migrations applied, public route, unauthenticated-denial, privileged-admin login, admin authorization, CSRF logout, and login-rate-limit production smoke checks, an isolated Singapore-region Neon Preview database with all 16 migrations applied, an isolated free Upstash Redis Preview resource with auto-upgrade and production pack disabled plus passing TLS BullMQ connection, job round-trip, and cleanup checks, an isolated Sentry Developer Preview resource in region DE with privacy-safe NestJS unhandled-error capture, disabled tracing, sanitized events and breadcrumbs, an optional `SENTRY_DSN` contract, passing sanitizer tests and synthetic delivery, protected API and web Preview deployments with stable staging aliases, real staging database readiness and isolation checks, passing staging public-route smoke checks, and a server-only API-origin-scoped Deployment Protection adapter, real Playwright E2E, axe accessibility, and visual-regression gates running on isolated local servers, a passing isolated PostgreSQL 18 volume-layout check, and a passing isolated local logical backup/restore drill covering 16 migrations and 51 public tables | Blocked: isolated object storage, owner-controlled email sender domain plus SMTP/live-delivery validation, persistent worker/ClamAV, and Neon production backup/PITR owner-dashboard confirmation remain; the latest API Preview build is ready, but its live auth smoke rerun is blocked by Vercel Authentication unless the owner grants a scoped bypass |
+| Phase 1 — Identity and journal configuration | In progress | One canonical login for general and platform-admin accounts with role-based routing; registration, verification, reset, and session administration; Argon2id passwords and hashed opaque tokens; profile fields for name, affiliation, country, expertise, user-entered unverified ORCID, locale, and timezone; profile ownership, CSRF, validation, and audit; platform-admin user search, cursor pagination, suspend/restore, self-lockout and last-admin protection, session revocation, and audit; optional TOTP MFA for platform administrators with AES-256-GCM encrypted secrets, bounded one-time login challenges, audited setup/login events, and connected setup/verification UI; a responsive ANG-branded CMS administration shell with server-validated platform-admin access, desktop and mobile navigation, factual module directory, and sticky journal-configuration navigation; database-backed journal creation and configuration; published/draft visibility; multi-role journal memberships; centralized permission policy; server-side journal-scoped management checks; cross-journal isolation tests; database-backed public journal directory and detail page; journal sections, article types, submission checklists, versioned declarations, and templates with tenant-scoped configuration-editing UI; BullMQ producers for verification and reset email, centralized idempotent job contracts, SMTP worker templates, bounded exponential retry, failed-job retention, structured delivery logs, delivery audit state, and a passing live Redis-to-worker-to-Mailpit smoke test; deterministic PostgreSQL migrations; verified local admin/public smoke tests; active audited platform administrators bootstrapped in production and isolated staging without committing credentials; successful privileged production and staging login plus admin authorization checks; CSRF logout verified in production; complete critical E2E and security coverage including a browser CMS navigation and axe audit; unit tests, integration tests, typecheck, migration validation, production build, public invalid-login rejection, unauthenticated admin denial, and rate-limit enforcement pass | An owner-controlled email sender domain plus persistent staging/production worker and live-delivery verification remain |
+| Phase 2 — Author submission | Completed | Tenant-scoped author-owned drafts; published/open-journal and active article-type validation; pre-verification HTTP draft creation with a verified-email gate at final submission; structured metadata, ordered authors and exactly-one-corresponding-author database protection; keyword and subject ordering; snapshotted checklist and versioned declaration acceptances; author-visible timeline; automatic author membership; audited autosave API; responsive author dashboard, journal/type selection, and multi-section autosave editor; ten-minute S3-compatible presigned private upload authorization with size/type/purpose constraints; storage HEAD verification; explicit private visibility; quarantine states; idempotent BullMQ scan jobs; worker-side content MIME detection, SHA-256 checksums, ClamAV streaming, infected/rejected object removal, safe metadata-only API responses, upload progress/polling/removal UI; server-authoritative full validation; idempotent DRAFT to SUBMITTED transition; immutable version-one snapshot; receipt timeline; deterministic migrations; controller-boundary, cross-owner, cross-journal, and finalization integration tests; unit tests for scanner decisions; passing live presigned upload-to-finalization smoke; passing browser registration, verification, canonical login, tenant/type selection, autosave, direct presigned CORS upload, content scan, finalization, immutable receipt, editor axe audit, and automatic database/object cleanup; production UAT confirms unverified registration/login, DRAFT creation, author visibility, and HTTP 422 finalization denial with fixture cleanup; format, lint, typecheck, migration, E2E, accessibility, visual, and production-build gates pass | None |
+| Phase 3 — Editorial screening | Completed | Tenant-scoped editorial journal discovery and cursor queue with state, assignment, search, urgency, and age controls; EIC access to all journal submissions and Section Editor access only to active assignments; private manuscript metadata workspace without raw storage paths; completeness/scope/policy assessments; confidential internal notes; same-journal handling-editor validation and audited assignment override reasons; correction and desk-reject letters with explicit required changes; author-visible released decisions without internal rationale; transactional notifications with metadata-minimized jobs; deterministic migration and one-active-assignment database constraint; cross-tenant, cross-role, author-confidentiality, integration, browser, and editor axe coverage; format, lint, typecheck, unit, integration, migration, E2E, accessibility, visual, and production-build gates pass | None |
+| Phase 4 — Peer review | Completed | Tenant-scoped reviewer profiles and expertise directory with availability/capacity; immutable section-aware versioned review forms; editor-authorized invitation and reminder workflow with hashed rotating single-use tokens, deadlines, conflict declaration, decline/expiry handling, and duplicate-round protection; single- and double-anonymous metadata/file access over immutable submission versions; sanitized private downloads without raw storage paths or cover-letter exposure; reviewer draft/final forms with required questions, separated author/confidential comments, recommendations, lock-on-submit, audited state changes, and metadata-minimized email jobs; private review-file upload, quarantine, content scan, and visibility intent; editor round monitoring and reviewer workspaces; deterministic migration; cross-tenant, cross-role, token lifecycle, confidentiality, browser, axe, file-pipeline, and notification coverage; format, lint, typecheck, unit, integration, migration, E2E, accessibility, visual, and production-build gates pass | None |
+| Phase 5 — Decisions and revisions | Completed | Tenant-authorized reject, major-revision, minor-revision, and accept decisions with editable journal templates; immutable letter and selected-review snapshots; separated internal rationale and confidential reviewer comments; round closure and assignment revocation; accepted-version freezing; due-dated revision requests with editor-only or external-review routing; throttled reminders; private scanned revised manuscript and response uploads; idempotent immutable next-version finalization; author-safe decision history and released-file downloads; editor revision-response view; audited metadata-minimized notifications; deterministic migrations; serial database integration execution; cross-tenant, confidentiality, workflow, browser, accessibility, visual, migration, and build gates pass | None |
+| Phase 6 — Production and publication | Completed | Tenant-scoped copyediting and production assignments; author queries and responses; accepted-version freeze consumption; private copyedited source upload, quarantine, antivirus scan, and authorized download; versioned publication metadata validation; issue creation, ordering, optional scanned/approved public cover, and public archive; private public-style preview; PDF galley authorization, scan, approval, and private-to-public storage promotion; EIC-only UTC scheduling and idempotent manual or worker publication; stable canonical article URLs and Schema.org metadata; append-only correction, withdrawal, and retraction notices; PostgreSQL discovery by title, abstract, keyword, author, affiliation, DOI, and year with journal, section, article-type, and issue facets; dynamic sitemap and truthful database-backed homepage; metadata-minimized queued notifications; audited state changes; deterministic migrations; cross-role, tenant, search, notification, scheduler, browser, storage, antivirus, accessibility, visual, migration, and production-build gates pass | None |
+| Phase 7 — Hardening | Completed | Complete permission-matrix unit coverage; tenant, ownership, anonymity, private-file, publication, and denial integration/browser coverage; 6 passing E2E specifications covering all seven critical journeys; 4 passing axe accessibility routes; 2 passing visual baselines; 500-request public load smoke with zero failures and 75.4 ms p95; isolated PostgreSQL backup/restore drill with 16 migrations and 51 tables; production dependency audit with no known high or critical vulnerability; CI dependency and full local-service integration gates; security review; deployment and backup runbooks; and an explicit launch checklist | None |
 
 ### Phase 0 — Foundation
 
@@ -1589,6 +1596,78 @@ Until approved, use neutral configurable placeholders and do not fabricate legal
 ---
 
 ## 32. Changelog
+
+- **2026-08-22:** Removed the stale controller-only email-verification rejection from draft creation while retaining authentication, CSRF, tenant/article-type validation, and the service-level final-submission gate; added a controller regression test, pushed and deployed the READY API artifact, and passed a cleaned production UAT covering unverified registration, login, DRAFT creation, author visibility, and HTTP 422 finalization denial.
+
+- **2026-08-22:** Deployed the consolidated identity-page artifact to Vercel production, promoted the stable web alias, and verified HTTP 200 plus shared-context content on live login, password-recovery, and email-verification routes; MFA remains challenge-gated by design.
+
+- **2026-08-22:** Completed the shared identity-page visual system across login, registration, password recovery, email verification, and MFA; expanded axe and visual coverage to seven and five routes respectively; and fixed the production integration fixture to use a deterministic empty year rather than conflicting with the valid 2025 demonstration archive.
+
+- **2026-08-22:** Deployed the redesigned canonical login artifact to Vercel production, promoted the stable `aksara-nusa-global.vercel.app` alias, and verified HTTP 200 plus the new two-panel context and workspace call to action on the live route.
+
+- **2026-08-22:** Redesigned the canonical login page as a responsive two-panel ANG identity experience while preserving one login stack, role-based routing, accessible feedback, password recovery, and pre-verification workspace access behavior.
+
+- **2026-08-22:** After explicit owner approval, ran the idempotent fictional demonstration seed against the production database through ephemeral Vercel environment injection without writing secrets; verified exactly three public issues, thirty public articles, and successful homepage/journal rendering on the stable production alias.
+
+- **2026-08-22:** Pushed commit `df1384f`, deployed the authorization/API and redesigned web artifacts to READY Vercel production deployments, promoted the stable `aksara-api.vercel.app` and `aksara-nusa-global.vercel.app` aliases, and passed read-only health/home/registration smokes; production demo seeding remains blocked pending explicit approval for that data mutation.
+
+- **2026-08-22:** Enabled pre-verification login and draft preparation while preserving final-submission verification; added centralized author-facing progress phases, a richer database-backed homepage and registration experience, and an idempotent fictional seed for one annual volume with three issues and ten articles per issue, with integration, type, build, accessibility, and visual gates passing.
+
+- **2026-08-22:** After the owner confirmed that `myboy.com` was never purchased or controlled, removed its unconfigured Vercel domain claim and deleted the Onboarding-only `aksara-production-email` Resend resource with its API connection and encrypted variables; verified that the ANG production deployment remains Ready and retained email delivery as blocked pending an owner-controlled sender domain.
+
+- **2026-08-22:** After direct owner acceptance, provisioned the zero-cost Resend production resource for `mail.myboy.com` in `ap-northeast-1` and connected its encrypted API variables to `aksara-api`; retained the email blocker because the domain remains `Onboarding` until its public DKIM and SPF records are added at the authoritative GoDaddy DNS and live queued delivery passes.
+
+- **2026-08-22:** Replaced the sparse platform-admin presentation with a responsive ANG-branded CMS shell, visible Journals & CMS, Users, and Security modules, a platform-admin-validated nested layout, mobile navigation, and sticky journal-configuration anchors; added a passing browser login, module-navigation, and axe accessibility journey without changing role or tenant authorization.
+
+- **2026-08-22:** After direct owner acceptance, provisioned the isolated zero-cost Sentry Developer Preview resource in region DE; added privacy-safe NestJS global unhandled-error capture with tracing disabled and request, identity, credential, and breadcrumb payload sanitization; passed sanitizer tests and synthetic delivery; and deployed a ready protected API Preview build behind the stable staging alias. The latest live auth smoke rerun remains blocked at Vercel Authentication, and Deployment Protection was not weakened.
+
+- **2026-08-22:** Reviewed official staging-provider constraints and stopped before billing-capable actions: Cloudflare R2 is S3-compatible and has included monthly usage but requires an owner checkout/subscription that can bill overages, Render does not offer Free instances for persistent background workers, and Resend requires an owner-controlled verified sending domain; no storage, SMTP, worker, or paid resource was created.
+
+- **2026-08-22:** After direct owner acceptance of the Upstash terms, provisioned the isolated `aksara-staging-redis` Preview resource on the Free plan with auto-upgrade, production pack, and eviction disabled; redeployed the protected staging API; and passed TLS BullMQ connectivity, temporary-job round-trip and cleanup, liveness, database readiness, public route, admin login/authorization, anonymous denial, and web regression smoke checks without creating a charge.
+
+- **2026-08-22:** Confirmed the Sentry Developer telemetry plan is priced at zero, but stopped before installation because its Marketplace addendum, privacy policy, and service terms require direct owner acceptance; no telemetry resource or charge was created.
+
+- **2026-08-22:** Provisioned a separate no-cost Singapore Neon Preview database, applied all 16 migrations, deployed protected API and web staging aliases, added an exact-origin server-only Deployment Protection adapter, passed staging liveness, database-readiness, public-route, admin-login, privileged-authorization, and anonymous-denial smoke checks, and retained Phase 0 as blocked pending no-cost Redis terms acceptance plus storage, SMTP, worker/ClamAV, telemetry, and production backup/PITR evidence.
+
+- **2026-08-22:** With explicit owner approval, rotated and re-enabled the audited production platform administrator using the locally retained bootstrap credentials; verified real admin login, platform-admin authorization, and CSRF-protected logout against the public API, and confirmed the five-attempt/15-minute production login rate limit without weakening it.
+
+- **2026-08-22:** Applied all 16 committed migrations to Neon, deployed and promoted the current API and web builds to `aksara-api.vercel.app` and `aksara-nusa-global.vercel.app`, and passed production liveness, PostgreSQL readiness, public-page, invalid-login, and unauthenticated-admin-denial smoke checks; privileged login validation remains blocked because the retained local bootstrap password differs from production and credential rotation requires explicit owner approval.
+
+- **2026-08-22:** Audited the live Vercel topology after CI passed: confirmed separate web and API production projects and an available Neon production resource, but marked Phase 0 blocked because isolated Preview/Staging configuration is absent, provider backup/PITR is not verifiable through the available CLI, and the active API deployment still exposes the previous readiness contract.
+
+- **2026-08-22:** Verified GitHub pull-request CI run `32512749302` end to end after making clean-checkout workspace builds, integration environment forwarding, one-shot object-storage bootstrap, and Playwright development-token delivery deterministic; quality, dependency audit, secret/configuration scan, five service-image scans, migrations, integration tests, six browser journeys, and accessibility checks all passed.
+
+- **2026-08-22:** Replaced the archived MinIO local emulator with pinned SeaweedFS 4.29, preserved the legacy MinIO volume, bound local service ports to loopback, added an S3 contract smoke for private/public buckets and copy promotion, configured AWS SDK checksum behavior for S3-compatible presigned uploads, verified the full upload/ClamAV/finalization path, validated PostgreSQL 18's major-version data layout, ran clean Gitleaks history/worktree scans and the complete Trivy service-image matrix, and added a scoped expiring gosu false-positive exception backed by the maintainer's reachability policy.
+
+- **2026-08-21:** Added fail-closed staging/production validation for HTTPS, PostgreSQL and Redis TLS, queued email and scanning, publication scheduling, authenticated SMTP, bucket isolation, and telemetry; replaced static readiness with a tested PostgreSQL query; added read-only staging smoke automation; hardened CI with SHA-pinned Node 24 actions plus Git-history secret, filesystem, misconfiguration, and service-image scans; removed unsigned direct object-storage redirects from public galley and cover delivery; and corrected the PostgreSQL 18 Compose volume layout while preserving the legacy local volume.
+
+- **2026-08-20:** Completed Phase 7 local hardening with an exhaustive role/permission matrix, expanded CI integration and production dependency-audit gates, patched Next.js/Nodemailer/file-type and transitive security dependencies, zero known production audit findings, passing full E2E/accessibility/visual gates, a 500-request zero-error load smoke, an isolated 16-migration/51-table backup-restore drill, security and deployment runbooks, and a launch checklist that preserves external production and responsible-human blockers.
+
+- **2026-08-20:** Completed Phase 6 with tenant-scoped production assignments and author queries, private scanned copyediting sources, versioned publication metadata, issues and approved covers, scanned public galleys, private preview, EIC-only UTC scheduling, idempotent manual and worker publication, public archives and scholarly metadata, faceted PostgreSQL discovery, durable publication-update history, audited queued notifications, and passing full quality gates; Phase 7 hardening is now in progress.
+
+- **2026-08-20:** Completed Phase 5 with tenant-scoped editorial decisions, editable letter templates, selective author-safe review release, round closure, accepted-version freezing, revision due dates and reminders, editor-only or external reevaluation, private scanned revised files, idempotent immutable version resubmission, editor response evaluation, audited metadata-minimized notifications, deterministic migrations, stable serial integration tests, and passing full quality gates.
+
+- **2026-08-20:** Completed Phase 4 with tenant-scoped reviewer discovery, immutable versioned review forms, secure invitation/reminder and token lifecycle, conflict/decline/expiry handling, blind access to sanitized immutable manuscripts, private scanned review files, separated confidential and author comments, final-response locking, editor round monitoring, audited email events, and passing unit, integration, migration, browser, axe, visual, and production-build gates.
+
+- **2026-08-20:** Completed Phase 3 with the tenant-scoped editorial queue and three-region screening workspace, server-authorized assessments and assignments, confidential notes, correction and desk-reject decisions, author-safe released letters, audited notifications, deterministic migration, cross-tenant integration tests, and a passing editor-to-author browser journey with axe validation; runtime testing also exposed and fixed inherited-controller dependency injection and serialized shared-service browser fixtures.
+
+- **2026-08-20:** Completed Phase 2 with isolated Playwright infrastructure and a passing browser journey from registration and verification through tenant-scoped draft creation, autosave, presigned private upload, content/ClamAV scan, finalization, immutable receipt, axe audit, visual baselines, and fixture/object cleanup; the journey also exposed and fixed invalid development-environment checks, a missing public article-type ID contract, redundant UI filtering, and author-name parsing.
+
+- **2026-08-20:** Started Docker Desktop and validated the complete local service stack: Redis, MinIO bucket bootstrap and private policy, Mailpit, and ClamAV are healthy; repeatable storage and email smoke tests passed through real queues and services.
+
+- **2026-08-20:** Added the Phase 2 private file pipeline and finalization path: presigned upload authorization, storage verification, quarantine and idempotent scan queue, content-based MIME/checksum/ClamAV worker, safe removal, complete UI states, server validation, immutable version snapshot, receipt timeline, migrations, and passing automated coverage.
+
+- **2026-08-20:** Started Phase 2 with tenant-scoped author-owned drafts, structured metadata and ordered authors, snapshotted checklist/declaration acceptances, author timeline and autosave workspace, deterministic migration, and passing ownership/isolation integration coverage.
+
+- **2026-08-20:** Added optional TOTP MFA for platform administrators with encrypted secrets, bounded one-time login challenges, audited setup and verification, connected admin security UI, deterministic migration, and passing integration coverage.
+
+- **2026-08-20:** Added platform-admin user search and cursor pagination, audited suspend/restore controls, session revocation, self-lockout and last-active-admin protections, connected admin UI states, and passing integration coverage.
+
+- **2026-08-20:** Provisioned and connected the Singapore-region Neon production database, applied all five committed migrations, redeployed the API, verified health and database-backed journal queries, published the branded frontend at `aksara-nusa-global.vercel.app`, and securely bootstrapped one active audited production platform administrator without committing credentials.
+
+- **2026-08-20:** Renamed the working product to Aksara Nusa Global Publishing and implemented its responsive logo lockup, metadata, identity-page branding, and shared accessible navy-gold theme; detailed visual rules live in `DESIGN.md`.
+
+- **2026-08-20:** Added audited BullMQ verification/reset email producers, an SMTP worker with idempotency, bounded retry and failed-state retention, safe templates and tests; deployed the frontend and NestJS API to Vercel production, wired the web to the API, and added deterministic Prisma generation, while recording the required Neon Marketplace terms acceptance and unavailable live queue-to-SMTP validation as blockers.
 
 - **2026-08-19:** Added tenant-scoped journal sections, article types, submission checklists, versioned declarations, and templates, plus the journal configuration-editing UI, with cross-journal isolation tests and a deterministic migration.
 

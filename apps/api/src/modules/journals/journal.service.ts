@@ -66,6 +66,16 @@ interface TemplateInput {
   isActive?: boolean;
 }
 
+interface ReviewFormInput {
+  name: string;
+  sectionId?: string | null;
+  questions: Array<{
+    prompt: string;
+    type: 'LONG_TEXT' | 'BOOLEAN' | 'RATING';
+    required: boolean;
+  }>;
+}
+
 const publicJournalSelect = {
   id: true,
   slug: true,
@@ -91,6 +101,10 @@ const managedConfigInclude = {
   checklistItems: { orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }] },
   declarations: { orderBy: [{ code: 'asc' as const }, { version: 'desc' as const }] },
   templates: { orderBy: [{ sortOrder: 'asc' as const }, { title: 'asc' as const }] },
+  reviewForms: {
+    include: { questions: { orderBy: { sortOrder: 'asc' as const } } },
+    orderBy: [{ name: 'asc' as const }, { version: 'desc' as const }],
+  },
 };
 
 const publicConfigInclude = {
@@ -102,6 +116,7 @@ const publicConfigInclude = {
   articleTypes: {
     where: { isActive: true },
     select: {
+      id: true,
       slug: true,
       title: true,
       description: true,
@@ -254,6 +269,17 @@ export class JournalService {
         create: { journalId, userId: user.id, role },
         update: {},
       });
+      if (role === 'REVIEWER')
+        await transaction.reviewerProfile.upsert({
+          where: { journalId_userId: { journalId, userId: user.id } },
+          create: {
+            journalId,
+            userId: user.id,
+            languages: [user.locale],
+            expertise: { create: user.expertise.map((value) => ({ value })) },
+          },
+          update: {},
+        });
       await transaction.auditEvent.create({
         data: {
           actorId,
@@ -638,6 +664,54 @@ export class JournalService {
         },
       );
       return updated;
+    });
+  }
+
+  async createReviewForm(
+    journalId: string,
+    input: ReviewFormInput,
+    actorId: string,
+    requestId: string,
+  ) {
+    const sectionId = await this.resolveSectionId(journalId, input.sectionId);
+    if (sectionId === 'invalid') return 'invalid-section' as const;
+    return database.$transaction(async (transaction) => {
+      const latest = await transaction.reviewForm.findFirst({
+        where: { journalId, name: input.name },
+        orderBy: { version: 'desc' },
+        select: { version: true },
+      });
+      if (latest)
+        await transaction.reviewForm.updateMany({
+          where: { journalId, name: input.name, isActive: true },
+          data: { isActive: false },
+        });
+      const form = await transaction.reviewForm.create({
+        data: {
+          journalId,
+          sectionId,
+          name: input.name,
+          version: (latest?.version ?? 0) + 1,
+          questions: {
+            create: input.questions.map((question, sortOrder) => ({ ...question, sortOrder })),
+          },
+        },
+        include: { questions: { orderBy: { sortOrder: 'asc' } } },
+      });
+      await this.recordAudit(
+        transaction,
+        actorId,
+        requestId,
+        journalId,
+        'journal.review_form_versioned',
+        {
+          reviewFormId: form.id,
+          name: form.name,
+          version: form.version,
+          questionCount: form.questions.length,
+        },
+      );
+      return form;
     });
   }
 

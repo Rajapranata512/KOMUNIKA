@@ -1,3 +1,5 @@
+import './instrument.js';
+
 import { randomUUID } from 'node:crypto';
 
 import { NestFactory } from '@nestjs/core';

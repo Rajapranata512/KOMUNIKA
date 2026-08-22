@@ -1,9 +1,9 @@
-# DESIGN.md — Aksara Journal Platform Design System and UX Specification
+# DESIGN.md — Aksara Nusa Global Publishing Design System and UX Specification
 
 - **Document status:** Approved design baseline
 - **Applies to:** Public publishing site, author workspace, reviewer workspace, editorial workspace, and administration
-- **Design objective:** Credible scholarly publishing with modern operational clarity
-- **Last updated:** 2026-08-03
+- **Design objective:** Credible scholarly publishing with modern operational clarity and a restrained ANG publisher identity
+- **Last updated:** 2026-08-22
 
 ---
 
@@ -93,14 +93,15 @@ Contrast, focus, keyboard access, error recovery, and readable content are found
 
 ### 4.1 Concept
 
-**“Modern editorial desk.”**
+**“Modern editorial desk with ANG publisher identity.”**
 
 The visual reference is a high-quality scholarly journal combined with a precise editorial workflow system:
 
 - paper-like reading surfaces;
 - dark ink typography;
 - thin editorial rules;
-- modest use of deep blue as an action and trust color;
+- ANG navy as the primary trust and action color;
+- restrained gold rules and accents inspired by the approved publisher lockup;
 - warm neutral backgrounds rather than sterile pure white everywhere;
 - compact operational density without becoming cramped.
 
@@ -109,6 +110,14 @@ The visual reference is a high-quality scholarly journal combined with a precise
 The project must not visually imitate Scopus, SINTA, OJS, Elsevier, Springer Nature, Wiley, Taylor & Francis, or another publisher.
 
 It may follow familiar scholarly usability conventions, but brand marks, color systems, component appearance, and page composition must remain original.
+
+### 4.3 Publisher identity
+
+- The canonical public name is **Aksara Nusa Global Publishing**; **ANG Publishing** is the approved compact label.
+- Use the horizontal ANG lockup on public chrome and identity entry points. Keep its aspect ratio, whitespace, navy, and gold intact.
+- On desktop, login, registration, password recovery, email verification, and MFA challenge pages use the same balanced two-panel identity composition: a navy contextual panel with the ANG lockup and concise role, workflow, or security guidance beside a focused white action panel. Collapse to one column on smaller screens; keep form labels, feedback, recovery links, and keyboard order explicit. Implement the contextual panel once as a shared component so identity routes cannot drift visually.
+- Gold is decorative or used for large/high-contrast accents. Use the darker accessible gold token for text and controls.
+- The publisher address and legal contact details must remain configurable and must not be copied from a visual reference without owner confirmation.
 
 ---
 
@@ -122,12 +131,12 @@ Define tokens once in `packages/ui/tokens` and expose them as CSS custom propert
 
 ```css
 :root {
-  --color-canvas: #f5f3ee;
+  --color-canvas: #f7f6f2;
   --color-surface: #ffffff;
   --color-surface-subtle: #faf9f6;
   --color-surface-inset: #efede7;
 
-  --color-ink: #17202a;
+  --color-ink: #101b2a;
   --color-ink-muted: #58616b;
   --color-ink-subtle: #7a828a;
   --color-ink-inverse: #ffffff;
@@ -135,12 +144,13 @@ Define tokens once in `packages/ui/tokens` and expose them as CSS custom propert
   --color-border: #d9d6ce;
   --color-border-strong: #b7b2a8;
 
-  --color-brand: #173f5f;
-  --color-brand-hover: #0f324d;
-  --color-brand-soft: #e8eff4;
+  --color-brand: #09264a;
+  --color-brand-hover: #061b35;
+  --color-brand-soft: #eaf0f6;
 
-  --color-accent: #9a6b2f;
-  --color-accent-soft: #f3eadc;
+  --color-accent: #8a6200;
+  --color-accent-decorative: #d9a520;
+  --color-accent-soft: #f7edd0;
 
   --color-success: #276749;
   --color-success-soft: #e7f3ec;
@@ -173,6 +183,7 @@ Load through `next/font` where available. Use a system fallback stack. Do not bu
 
 ### Usage
 
+- Publisher lockup: approved ANG image asset, never reconstructed with interface fonts
 - Journal wordmark: serif, medium or semibold
 - Article and issue title: serif
 - Long-form abstract or article text: serif or carefully tested reading style
@@ -302,7 +313,7 @@ Do not hide critical functionality on mobile. Recompose it.
 
 Contents:
 
-- publisher or journal wordmark;
+- ANG publisher lockup or journal wordmark;
 - Journals;
 - Current Issue;
 - Archives;
@@ -340,6 +351,17 @@ Journal manager adds:
 - Journal Settings
 
 Platform admin uses a clearly separated administration area to avoid accidental context confusion.
+
+Platform administration uses a restrained CMS shell:
+
+- a persistent 244px ANG navy side rail on desktop, replaced by an accessible disclosure menu below the desktop breakpoint;
+- a compact identity and utility header that exposes the signed-in administrator, public-site exit, and logout;
+- top-level navigation only for implemented modules: Overview, Journals & CMS, Users, and Security;
+- task-oriented module cards on the overview instead of vanity analytics;
+- sticky in-page navigation for long journal-configuration forms, including identity, sections, article types, checklist, declarations, templates, and review forms;
+- one visible active-navigation state using both structure and the gold accent, never color alone.
+
+Do not mix platform administration with author or editorial navigation. Do not display links for operational modules that have no working route and server-authorized behavior.
 
 ## 7.3 Breadcrumbs
 
@@ -496,6 +518,8 @@ Composition:
 5. Clear publisher trust and policy links
 6. Footer with contact, privacy, accessibility, and status links
 
+The ANG homepage may use an asymmetric editorial hero paired with a compact four-stage manuscript-process panel, followed by a bordered article grid, a restrained journal list, and a three-column publishing-principles strip. Use real database records, square editorial borders, navy/gold hierarchy, and generous whitespace; do not introduce gradients, inflated platform metrics, or decorative dashboard cards.
+
 Avoid a startup-style hero with meaningless metrics or decorative gradient art.
 
 ## 9.2 Journal landing page
@@ -525,6 +549,15 @@ The journal cover may appear, but it should not dominate usability.
 - Show issue title, volume, number, date, cover, and article count.
 - Support accessible filtering.
 - Do not use an infinite masonry grid.
+- For the planned cadence, present one volume per year with three numbered issues and up to ten articles in each issue. Do not label individual articles as journals.
+
+### Search and discovery
+
+- Keep the primary keyword field visually dominant.
+- Present journal, section, article-type, issue, and year filters as a compact labeled fieldset.
+- Store active search and filter state in the URL so results can be shared and restored.
+- Use journal-aware option labels when slugs or names may repeat across tenants.
+- Show a truthful empty state when no approved public article matches. Explicitly fictional database seed records may appear only in a clearly labeled demonstration journal; never inject fallback cards that are not returned by the API.
 
 ## 9.4 Issue page
 
@@ -709,6 +742,7 @@ Do not bury the current round, manuscript version, or due dates.
 ## 9.12 Issue builder
 
 - issue metadata form;
+- optional JPEG or PNG cover upload with visible quarantine, scan, and public-approval states;
 - unpublished accepted-article pool;
 - ordered table of contents;
 - drag-and-drop only as an enhancement, with keyboard controls and explicit move buttons;
@@ -1091,5 +1125,17 @@ Do not build the entire component library before implementing real vertical slic
 ---
 
 ## 20. Changelog
+
+- **2026-08-22:** Extended the shared two-panel identity composition to password recovery, email verification, and MFA challenge states and consolidated their contextual panel into one reusable component.
+
+- **2026-08-22:** Replaced the flat standalone login card with the shared responsive two-panel ANG identity composition, including role-aware context, progress guidance, and a focused sign-in form.
+
+- **2026-08-22:** Added the responsive asymmetric editorial homepage, database-backed article/journal presentation, author-journey registration panel, four-stage author progress summary, and explicit visual conventions for the three-issue fictional demonstration volume.
+
+- **2026-08-22:** Defined and implemented the responsive platform-administration CMS shell with ANG navy-gold navigation, factual module cards, a compact account utility bar, mobile disclosure navigation, and sticky journal-configuration anchors.
+
+- **2026-08-20:** Added URL-preserved faceted public-search behavior, truthful database-backed empty states, and the scanned/approved optional issue-cover workflow and rendering convention.
+
+- **2026-08-20:** Adopted the Aksara Nusa Global Publishing lockup and accessible ANG navy-gold theme for public chrome and identity entry points, including responsive and brand-integrity rules.
 
 - **2026-08-03:** Initial visual direction, anti-template rules, tokens, layouts, navigation, page specifications, component boundaries, responsive behavior, accessibility, and design QA criteria.

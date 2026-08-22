@@ -1,0 +1,9 @@
+vulnerabilities:
+  - id: CVE-2025-68121
+    paths:
+      - usr/local/bin/gosu
+    expired_at: 2026-10-15
+    statement: >-
+      Scoped to gosu only. The gosu maintainer documents Go crypto/tls findings as
+      not applicable because gosu does not invoke network or TLS code. Reassess on
+      expiry or remove earlier when the official PostgreSQL image is rebuilt.

@@ -2,8 +2,8 @@ import { PublicPage } from '../../components/public-chrome';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
-  title: 'Daftar Jurnal | Aksara',
-  description: 'Jelajahi jurnal ilmiah yang dikelola melalui Aksara Journal Platform.',
+  title: 'Daftar Jurnal',
+  description: 'Jelajahi jurnal ilmiah yang dikelola oleh Aksara Nusa Global Publishing.',
 };
 
 const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3001/api/v1';
@@ -20,8 +20,15 @@ interface PublicJournal {
 }
 
 export default async function JournalsPage() {
-  const response = await fetch(`${apiBaseUrl}/journals`, { cache: 'no-store' });
-  const journals = response.ok ? ((await response.json()) as PublicJournal[]) : [];
+  let journals: PublicJournal[] = [];
+  let directoryUnavailable = false;
+  try {
+    const response = await fetch(`${apiBaseUrl}/journals`, { cache: 'no-store' });
+    if (response.ok) journals = (await response.json()) as PublicJournal[];
+    else directoryUnavailable = true;
+  } catch {
+    directoryUnavailable = true;
+  }
   return (
     <PublicPage>
       <main id={'main-content'} className={'public-list-page'}>
@@ -37,7 +44,15 @@ export default async function JournalsPage() {
             <h2 id={'journal-list-heading'}>Jurnal yang tersedia</h2>
             <p>{journals.length} jurnal</p>
           </div>
-          {journals.length ? (
+          {directoryUnavailable ? (
+            <div className={'empty-state'} role={'status'}>
+              <h3>Direktori jurnal sedang tidak tersedia</h3>
+              <p>
+                Layanan data jurnal belum terhubung. Silakan coba kembali setelah konfigurasi
+                layanan selesai.
+              </p>
+            </div>
+          ) : journals.length ? (
             journals.map((journal) => (
               <article className={'journal-row'} key={journal.id}>
                 <div>

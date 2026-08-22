@@ -4,8 +4,8 @@ services:
     image: postgres:18-alpine
     environment:
       { POSTGRES_DB: aksara, POSTGRES_USER: aksara, POSTGRES_PASSWORD: aksara_local_only }
-    ports: ['5432:5432']
-    volumes: [postgres_data:/var/lib/postgresql/data]
+    ports: ['127.0.0.1:5432:5432']
+    volumes: [postgres18_data:/var/lib/postgresql]
     healthcheck:
       {
         test: ['CMD-SHELL', 'pg_isready -U aksara -d aksara'],
@@ -16,16 +16,56 @@ services:
   redis:
     image: redis:8-alpine
     command: ['redis-server', '--appendonly', 'yes']
-    ports: ['6379:6379']
+    ports: ['127.0.0.1:6379:6379']
     volumes: [redis_data:/data]
     healthcheck: { test: ['CMD', 'redis-cli', 'ping'], interval: 5s, timeout: 5s, retries: 10 }
-  minio:
-    image: minio/minio:latest
-    command: ['server', '/data', '--console-address', ':9001']
-    environment: { MINIO_ROOT_USER: aksara_local, MINIO_ROOT_PASSWORD: aksara_local_password_only }
-    ports: ['9000:9000', '9001:9001']
-    volumes: [minio_data:/data]
+  object-storage:
+    image: chrislusf/seaweedfs:4.29
+    command:
+      [
+        'server',
+        '-dir=/data',
+        '-s3',
+        '-s3.iam=false',
+        '-s3.port.iceberg=0',
+        '-master.volumeSizeLimitMB=128',
+      ]
+    environment:
+      { AWS_ACCESS_KEY_ID: aksara_local, AWS_SECRET_ACCESS_KEY: aksara_local_password_only }
+    ports: ['127.0.0.1:9000:8333']
+    volumes: [object_storage_data:/data]
+    healthcheck:
+      {
+        test: ['CMD-SHELL', 'nc -z 127.0.0.1 8333'],
+        interval: 5s,
+        timeout: 5s,
+        retries: 20,
+        start_period: 10s,
+      }
+  object-storage-init:
+    image: chrislusf/seaweedfs:4.29
+    depends_on:
+      object-storage: { condition: service_healthy }
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - >-
+        printf '%s\n' 's3.bucket.create -name=aksara-private'
+        's3.bucket.create -name=aksara-public' 'exit' |
+        weed shell -master=object-storage:9333 -filer=object-storage:8888
+    restart: 'no'
   mailpit:
     image: axllent/mailpit:latest
-    ports: ['1025:1025', '8025:8025']
-volumes: { postgres_data: {}, redis_data: {}, minio_data: {} }
+    ports: ['127.0.0.1:1025:1025', '127.0.0.1:8025:8025']
+  clamav:
+    image: clamav/clamav:stable
+    ports: ['127.0.0.1:3310:3310']
+    volumes: [clamav_data:/var/lib/clamav]
+    healthcheck:
+      {
+        test: ['CMD-SHELL', 'clamdscan --ping 1'],
+        interval: 15s,
+        timeout: 10s,
+        retries: 20,
+        start_period: 60s,
+      }
+volumes: { postgres18_data: {}, redis_data: {}, object_storage_data: {}, clamav_data: {} }

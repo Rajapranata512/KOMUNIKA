@@ -98,6 +98,20 @@ const templateSchema = z.object({
   sortOrder: optionalSortOrder,
   isActive: z.boolean().optional(),
 });
+const reviewFormSchema = z.object({
+  name: z.string().trim().min(3).max(200),
+  sectionId: z.uuid().nullable().optional(),
+  questions: z
+    .array(
+      z.object({
+        prompt: z.string().trim().min(5).max(1000),
+        type: z.enum(['LONG_TEXT', 'BOOLEAN', 'RATING']).default('LONG_TEXT'),
+        required: z.boolean().default(true),
+      }),
+    )
+    .min(1)
+    .max(50),
+});
 
 function cookieValue(request: RequestWithContext, name: string): string | undefined {
   const entry = request.headers.cookie
@@ -541,5 +555,28 @@ export class AdminJournalController {
     if (updated === 'conflict') throw this.conflict(request);
     if (!updated) throw this.missingConfig(request);
     return updated;
+  }
+
+  @Post(':journalId/review-forms')
+  async createReviewForm(
+    @Param('journalId') journalId: string,
+    @Body() input: unknown,
+    @Headers('x-csrf-token') csrfToken: string | undefined,
+    @Req() request: RequestWithContext,
+  ) {
+    const identity = await this.requireManage(request, journalId);
+    this.requireCsrf(request, csrfToken);
+    const parsed = reviewFormSchema.safeParse(input);
+    if (!parsed.success)
+      throw this.invalid(request, 'REVIEW_FORM_INVALID', 'Form review tidak valid.');
+    const created = await this.journals.createReviewForm(
+      journalId,
+      parsed.data,
+      identity.user.id,
+      request.requestId ?? 'unknown',
+    );
+    if (created === 'invalid-section')
+      throw this.invalid(request, 'REVIEW_FORM_SECTION_INVALID', 'Seksi form review tidak valid.');
+    return created;
   }
 }

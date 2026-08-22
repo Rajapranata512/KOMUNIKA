@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canTransitionSubmission } from './submission-state.js';
+import { canTransitionSubmission, getAuthorProgressPhase } from './submission-state.js';
 
 describe('submission workflow', () => {
   it('allows the documented draft finalization transition', () => {
@@ -13,5 +13,13 @@ describe('submission workflow', () => {
 
   it('uses an explicit retraction transition for published content', () => {
     expect(canTransitionSubmission('PUBLISHED', 'RETRACTED')).toBe(true);
+  });
+
+  it('summarizes detailed editorial states without changing the state machine', () => {
+    expect(getAuthorProgressPhase('SUBMITTED')).toBe('WAITING');
+    expect(getAuthorProgressPhase('UNDER_REVIEW')).toBe('REVIEWED');
+    expect(getAuthorProgressPhase('RESUBMITTED')).toBe('EVALUATION');
+    expect(getAuthorProgressPhase('PRODUCTION')).toBe('ACCEPTED');
+    expect(getAuthorProgressPhase('REJECTED')).toBeNull();
   });
 });

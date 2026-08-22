@@ -4,6 +4,12 @@
   "private": true,
   "description": "Multi-journal scholarly submission, review, and publishing platform.",
   "packageManager": "pnpm@10.8.1",
+  "pnpm": {
+    "overrides": {
+      "deepmerge-ts": "8.0.0",
+      "nanoid": "3.3.18"
+    }
+  },
   "engines": {
     "node": ">=20.0.0"
   },
@@ -16,15 +22,27 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
-    "test:e2e": "node -e \"console.error(\u0027E2E tests are not implemented yet.\u0027); process.exit(1)\"",
-    "test:a11y": "node -e \"console.error(\u0027Accessibility tests are not implemented yet.\u0027); process.exit(1)\"",
-    "test:visual": "node -e \"console.error(\u0027Visual tests are not implemented yet.\u0027); process.exit(1)\"",
+    "test:e2e": "dotenv -e .env -- playwright test --project=e2e",
+    "test:a11y": "dotenv -e .env -- playwright test --project=a11y",
+    "test:visual": "dotenv -e .env -- playwright test --project=visual",
+    "test:load": "node tests/load/public-smoke.mjs",
+    "test:object-storage-smoke": "dotenv -e .env -- tsx apps/api/test/object-storage.smoke.ts",
+    "test:backup-restore": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/verify-postgres-backup.ps1",
+    "verify:staging": "tsx infra/scripts/verify-staging-readiness.ts",
+    "test:staging-smoke": "tsx infra/scripts/verify-staging-readiness.ts && node infra/scripts/staging-smoke.mjs",
     "db:validate": "pnpm --filter @aksara/database db:validate",
-    "db:migrate:test": "pnpm --filter @aksara/database db:migrate:test"
+    "db:migrate:test": "pnpm --filter @aksara/database db:migrate:test",
+    "db:seed:demo": "pnpm --filter @aksara/database seed:demo"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "3.1114.0",
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
     "@types/node": "^24.0.0",
+    "cross-env": "^7.0.3",
+    "dotenv-cli": "^10.0.0",
     "prettier": "^3.6.0",
+    "tsx": "4.23.5",
     "turbo": "^2.5.0",
     "typescript": "^5.9.0",
     "vitest": "^3.2.0"

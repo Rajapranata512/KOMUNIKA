@@ -2,9 +2,10 @@ import { randomUUID } from 'node:crypto';
 
 import { database } from '@aksara/database';
 import { hash } from 'argon2';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { AuthService } from '../src/modules/identity/auth.service.js';
+import type { TransactionalEmailQueue } from '../src/modules/notifications/transactional-email.queue.js';
 
 describe('administrator authentication integration', () => {
   const email = `integration-${randomUUID()}@aksara.local`;
@@ -66,7 +67,8 @@ describe('general identity lifecycle integration', () => {
   const email = `reader-${randomUUID()}@aksara.local`;
   const initialPassword = `Initial-A1-${randomUUID()}`;
   const replacementPassword = `Replacement-A1-${randomUUID()}`;
-  const auth = new AuthService();
+  const enqueue = vi.fn().mockResolvedValue('development-token');
+  const auth = new AuthService({ enqueue } as unknown as TransactionalEmailQueue);
   let userId: string | undefined;
 
   afterAll(async () => {
@@ -76,7 +78,7 @@ describe('general identity lifecycle integration', () => {
 
   it('registers, verifies, manages sessions, and resets password once', async () => {
     const previousEnvironment = process.env.APP_ENV;
-    process.env.APP_ENV = 'local';
+    process.env.APP_ENV = 'development';
     try {
       const registration = await auth.register(
         email,
@@ -87,13 +89,37 @@ describe('general identity lifecycle integration', () => {
       if (!registration?.developmentToken) return;
       userId = registration.user.id;
 
+      expect(enqueue).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'identity.verify-email',
+          recipient: email,
+          userId,
+        }),
+        expect.not.stringContaining(registration.developmentToken),
+      );
+
       const storedVerification = await database.emailVerificationToken.findFirstOrThrow({
         where: { userId },
       });
       expect(storedVerification.tokenHash).not.toContain(registration.developmentToken);
-      await expect(
-        auth.login(email, initialPassword, `integration-${randomUUID()}`),
-      ).resolves.toBeNull();
+      const unverifiedLogin = await auth.login(
+        email,
+        initialPassword,
+        `integration-${randomUUID()}`,
+      );
+      expect(unverifiedLogin).not.toBeNull();
+      if (unverifiedLogin) {
+        await expect(auth.authenticateUser(unverifiedLogin.sessionToken)).resolves.toMatchObject({
+          user: { emailVerified: false },
+        });
+        await expect(
+          auth.logout(
+            unverifiedLogin.sessionToken,
+            unverifiedLogin.csrfToken,
+            `integration-${randomUUID()}`,
+          ),
+        ).resolves.toBe(true);
+      }
       await expect(
         auth.verifyEmail(registration.developmentToken, `integration-${randomUUID()}`),
       ).resolves.toBe(true);
@@ -110,6 +136,10 @@ describe('general identity lifecycle integration', () => {
       const resetRequest = await auth.requestPasswordReset(email, `integration-${randomUUID()}`);
       expect(resetRequest.developmentToken).toBeTruthy();
       if (!resetRequest.developmentToken) return;
+      expect(enqueue).toHaveBeenLastCalledWith(
+        expect.objectContaining({ event: 'identity.password-reset', recipient: email, userId }),
+        expect.not.stringContaining(resetRequest.developmentToken),
+      );
       await expect(
         auth.resetPassword(
           resetRequest.developmentToken,

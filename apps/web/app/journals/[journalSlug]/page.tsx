@@ -37,15 +37,28 @@ interface PublicJournal {
     body: string;
   }>;
 }
+interface PublicIssue {
+  id: string;
+  slug: string;
+  title: string;
+  volume: string;
+  number: string;
+  year: number;
+  _count: { publications: number };
+}
 
 export default async function JournalPage({ params }: JournalPageProps) {
   const { journalSlug } = await params;
-  const response = await fetch(`${apiBaseUrl}/journals/${encodeURIComponent(journalSlug)}`, {
-    cache: 'no-store',
-  });
+  const [response, issuesResponse] = await Promise.all([
+    fetch(`${apiBaseUrl}/journals/${encodeURIComponent(journalSlug)}`, { cache: 'no-store' }),
+    fetch(`${apiBaseUrl}/public/journals/${encodeURIComponent(journalSlug)}/issues`, {
+      cache: 'no-store',
+    }),
+  ]);
   if (response.status === 404) notFound();
   if (!response.ok) throw new Error('Journal could not be loaded.');
   const journal = (await response.json()) as PublicJournal;
+  const issues = issuesResponse.ok ? ((await issuesResponse.json()) as PublicIssue[]) : [];
   return (
     <PublicPage>
       <main id={'main-content'} className={'public-list-page'}>
@@ -54,6 +67,28 @@ export default async function JournalPage({ params }: JournalPageProps) {
           <h1>{journal.title}</h1>
           <p className={'lede'}>{journal.description}</p>
         </header>
+        <section className={'journal-detail'} aria-labelledby={'issues-heading'}>
+          <div>
+            <h2 id={'issues-heading'}>Arsip issue</h2>
+            {issues.length ? (
+              <ul className={'policy-list'}>
+                {issues.map((issue) => (
+                  <li key={issue.id}>
+                    <a href={`/journals/${journalSlug}/issues/${issue.slug}`}>
+                      <strong>{issue.title}</strong>
+                    </a>
+                    <p>
+                      Volume {issue.volume}, Nomor {issue.number} ({issue.year}) ·{' '}
+                      {issue._count.publications} artikel
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Belum ada issue yang dipublikasikan.</p>
+            )}
+          </div>
+        </section>
         <section className={'journal-detail'} aria-labelledby={'scope-heading'}>
           <div>
             <h2 id={'scope-heading'}>Fokus dan ruang lingkup</h2>
