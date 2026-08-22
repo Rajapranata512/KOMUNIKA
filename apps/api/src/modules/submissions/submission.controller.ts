@@ -123,14 +123,6 @@ export class JournalSubmissionController extends SubmissionControllerBase {
   ) {
     const identity = await this.identity(request);
     this.requireCsrf(request, csrfToken);
-    if (!identity.user.emailVerified)
-      throw new ForbiddenException(
-        createApiError(
-          'EMAIL_VERIFICATION_REQUIRED',
-          'Verifikasi email diperlukan sebelum membuat submission.',
-          request.requestId ?? 'unknown',
-        ),
-      );
     const parsed = createSchema.safeParse(input);
     if (!parsed.success)
       throw new BadRequestException(
