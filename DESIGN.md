@@ -115,6 +115,7 @@ It may follow familiar scholarly usability conventions, but brand marks, color s
 
 - The canonical public name is **Aksara Nusa Global Publishing**; **ANG Publishing** is the approved compact label.
 - Use the horizontal ANG lockup on public chrome and identity entry points. Keep its aspect ratio, whitespace, navy, and gold intact.
+- On desktop, login and registration use the same balanced two-panel identity composition: a navy contextual panel with the ANG lockup and concise role/workflow guidance beside a focused white form panel. Collapse to one column on smaller screens; keep form labels, feedback, recovery links, and keyboard order explicit.
 - Gold is decorative or used for large/high-contrast accents. Use the darker accessible gold token for text and controls.
 - The publisher address and legal contact details must remain configurable and must not be copied from a visual reference without owner confirmation.
 
@@ -1124,6 +1125,8 @@ Do not build the entire component library before implementing real vertical slic
 ---
 
 ## 20. Changelog
+
+- **2026-08-22:** Replaced the flat standalone login card with the shared responsive two-panel ANG identity composition, including role-aware context, progress guidance, and a focused sign-in form.
 
 - **2026-08-22:** Added the responsive asymmetric editorial homepage, database-backed article/journal presentation, author-journey registration panel, four-stage author progress summary, and explicit visual conventions for the three-issue fictional demonstration volume.
 

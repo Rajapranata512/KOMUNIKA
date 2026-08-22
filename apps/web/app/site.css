@@ -1634,8 +1634,13 @@ footer {
   line-height: 1.65;
 }
 
-.auth-context h1 {
+.auth-context h1,
+.auth-context h2 {
+  margin-block: 20px;
+  font-family: var(--font-serif), serif;
   font-size: clamp(2.2rem, 4vw, 3.8rem);
+  font-weight: 500;
+  line-height: 1.04;
 }
 
 .auth-experience .auth-panel {
