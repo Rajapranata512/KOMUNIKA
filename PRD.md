@@ -1597,6 +1597,8 @@ Until approved, use neutral configurable placeholders and do not fabricate legal
 
 ## 32. Changelog
 
+- **2026-08-22:** Deployed the redesigned canonical login artifact to Vercel production, promoted the stable `aksara-nusa-global.vercel.app` alias, and verified HTTP 200 plus the new two-panel context and workspace call to action on the live route.
+
 - **2026-08-22:** Redesigned the canonical login page as a responsive two-panel ANG identity experience while preserving one login stack, role-based routing, accessible feedback, password recovery, and pre-verification workspace access behavior.
 
 - **2026-08-22:** After explicit owner approval, ran the idempotent fictional demonstration seed against the production database through ephemeral Vercel environment injection without writing secrets; verified exactly three public issues, thirty public articles, and successful homepage/journal rendering on the stable production alias.
