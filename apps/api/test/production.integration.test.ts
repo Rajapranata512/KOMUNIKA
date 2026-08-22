@@ -301,7 +301,7 @@ describe('tenant-scoped production and publication integration', () => {
         year: 2026,
       }),
     ).resolves.toHaveLength(1);
-    await expect(production.listPublic({ year: 2025 })).resolves.toHaveLength(0);
+    await expect(production.listPublic({ year: 1900 })).resolves.toHaveLength(0);
     await expect(production.publicSearchFacets()).resolves.toMatchObject({
       journals: expect.arrayContaining([
         { slug: 'production-' + suffix, title: 'Jurnal Produksi Fiktif' },

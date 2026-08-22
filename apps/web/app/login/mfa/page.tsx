@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import { IdentityContext } from '../../../components/identity-context';
+
 export default async function MfaLoginPage({
   searchParams,
 }: {
@@ -9,7 +11,29 @@ export default async function MfaLoginPage({
   if (!(await cookies()).get('aksara_mfa_challenge')) redirect('/login');
   const { error } = await searchParams;
   return (
-    <main id="main-content" className="auth-shell">
+    <main id="main-content" className="auth-shell auth-experience">
+      <IdentityContext
+        eyebrow={'Perlindungan administrator'}
+        heading={'Konfirmasi lapisan keamanan kedua.'}
+        description={
+          'Akses administratif memerlukan bukti tambahan setelah email dan password berhasil diperiksa.'
+        }
+        headingId={'mfa-context-heading'}
+        items={[
+          {
+            title: 'Kode berbatas waktu',
+            detail: 'Gunakan enam digit yang sedang aktif di aplikasi autentikator.',
+          },
+          {
+            title: 'Challenge sekali pakai',
+            detail: 'Permintaan login berakhir otomatis dan memiliki batas percobaan.',
+          },
+          {
+            title: 'Aktivitas diaudit',
+            detail: 'Autentikasi administrator dicatat tanpa menyimpan kode rahasia.',
+          },
+        ]}
+      />
       <section className="auth-panel" aria-labelledby="mfa-heading">
         <p className="eyebrow">Keamanan administrator</p>
         <h1 id="mfa-heading">Masukkan kode autentikator</h1>

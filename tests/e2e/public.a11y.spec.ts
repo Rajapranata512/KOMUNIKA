@@ -1,7 +1,15 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-for (const path of ['/', '/journals', '/search', '/login', '/register']) {
+for (const path of [
+  '/',
+  '/journals',
+  '/search',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/verify-email',
+]) {
   test(`${path} has no automatically detectable serious accessibility violations`, async ({
     page,
   }) => {

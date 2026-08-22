@@ -14,3 +14,13 @@ test('registration explains the author journey in its visual baseline', async ({
   await page.goto('/register');
   await expect(page).toHaveScreenshot('register.png', { fullPage: true, caret: 'initial' });
 });
+
+test('password recovery retains the shared identity composition', async ({ page }) => {
+  await page.goto('/forgot-password');
+  await expect(page).toHaveScreenshot('forgot-password.png', { fullPage: true, caret: 'initial' });
+});
+
+test('email verification retains the shared identity composition', async ({ page }) => {
+  await page.goto('/verify-email');
+  await expect(page).toHaveScreenshot('verify-email.png', { fullPage: true, caret: 'initial' });
+});

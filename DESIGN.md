@@ -115,7 +115,7 @@ It may follow familiar scholarly usability conventions, but brand marks, color s
 
 - The canonical public name is **Aksara Nusa Global Publishing**; **ANG Publishing** is the approved compact label.
 - Use the horizontal ANG lockup on public chrome and identity entry points. Keep its aspect ratio, whitespace, navy, and gold intact.
-- On desktop, login and registration use the same balanced two-panel identity composition: a navy contextual panel with the ANG lockup and concise role/workflow guidance beside a focused white form panel. Collapse to one column on smaller screens; keep form labels, feedback, recovery links, and keyboard order explicit.
+- On desktop, login, registration, password recovery, email verification, and MFA challenge pages use the same balanced two-panel identity composition: a navy contextual panel with the ANG lockup and concise role, workflow, or security guidance beside a focused white action panel. Collapse to one column on smaller screens; keep form labels, feedback, recovery links, and keyboard order explicit. Implement the contextual panel once as a shared component so identity routes cannot drift visually.
 - Gold is decorative or used for large/high-contrast accents. Use the darker accessible gold token for text and controls.
 - The publisher address and legal contact details must remain configurable and must not be copied from a visual reference without owner confirmation.
 
@@ -1125,6 +1125,8 @@ Do not build the entire component library before implementing real vertical slic
 ---
 
 ## 20. Changelog
+
+- **2026-08-22:** Extended the shared two-panel identity composition to password recovery, email verification, and MFA challenge states and consolidated their contextual panel into one reusable component.
 
 - **2026-08-22:** Replaced the flat standalone login card with the shared responsive two-panel ANG identity composition, including role-aware context, progress guidance, and a focused sign-in form.
 
