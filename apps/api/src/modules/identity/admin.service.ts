@@ -1,6 +1,40 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { database } from '@aksara/database';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { database, Prisma } from '@aksara/database';
 import { createApiError } from '@aksara/domain';
+
+const protectedUserRecordCount = {
+  journalMemberships: true,
+  journalsCreated: true,
+  submissions: true,
+  submissionAuthors: true,
+  filesUploaded: true,
+  editorialAssignments: true,
+  assignmentsCreated: true,
+  screeningAssessments: true,
+  screeningDecisions: true,
+  editorialNotes: true,
+  reviewerProfiles: true,
+  reviewRoundsAssigned: true,
+  reviewInvitations: true,
+  reviewInvitationsSent: true,
+  reviewAssignments: true,
+  editorialDecisions: true,
+  productionAssignments: true,
+  productionAssigned: true,
+  productionQueriesOpened: true,
+  productionQueriesAnswered: true,
+  publicationVersionsCreated: true,
+  publicationUpdatesCreated: true,
+} as const;
+
+function hasProtectedUserRecords(counts: Record<string, number>): boolean {
+  return Object.values(counts).some((count) => count > 0);
+}
 
 @Injectable()
 export class AdminService {
@@ -25,11 +59,27 @@ export class AdminService {
         emailVerifiedAt: true,
         disabledAt: true,
         createdAt: true,
-        _count: { select: { journalMemberships: true, sessions: true } },
+        _count: { select: { ...protectedUserRecordCount, sessions: true } },
       },
     });
     const nextCursor = users.length > 50 ? (users[49]?.id ?? null) : null;
-    return { users: users.slice(0, 50), nextCursor };
+    return {
+      users: users.slice(0, 50).map((user) => {
+        const { _count, ...profile } = user;
+        const protectedCounts = Object.fromEntries(
+          Object.entries(_count).filter(([relation]) => relation !== 'sessions'),
+        );
+        return {
+          ...profile,
+          _count: {
+            journalMemberships: _count.journalMemberships,
+            sessions: _count.sessions,
+          },
+          canDelete: user.platformRole === null && !hasProtectedUserRecords(protectedCounts),
+        };
+      }),
+      nextCursor,
+    };
   }
 
   async setDisabled(actorId: string, userId: string, disabled: boolean, requestId: string) {
@@ -83,6 +133,76 @@ export class AdminService {
         },
       });
     });
+    return { success: true };
+  }
+
+  async deleteUser(actorId: string, userId: string, requestId: string) {
+    if (actorId === userId)
+      throw new BadRequestException(
+        createApiError(
+          'ADMIN_SELF_DELETE_FORBIDDEN',
+          'Administrator tidak dapat menghapus akunnya sendiri.',
+          requestId,
+        ),
+      );
+
+    try {
+      await database.$transaction(
+        async (tx) => {
+          const target = await tx.user.findUnique({
+            where: { id: userId },
+            select: {
+              id: true,
+              platformRole: true,
+              _count: { select: protectedUserRecordCount },
+            },
+          });
+          if (!target)
+            throw new NotFoundException(
+              createApiError('USER_NOT_FOUND', 'Pengguna tidak ditemukan.', requestId),
+            );
+          if (target.platformRole)
+            throw new BadRequestException(
+              createApiError(
+                'ADMIN_DELETE_FORBIDDEN',
+                'Akun administrator tidak dapat dihapus melalui pengelolaan pengguna.',
+                requestId,
+              ),
+            );
+          if (hasProtectedUserRecords(target._count))
+            throw new ConflictException(
+              createApiError(
+                'USER_DELETE_BLOCKED_BY_RECORDS',
+                'Akun memiliki rekam jurnal atau editorial dan harus dinonaktifkan, bukan dihapus.',
+                requestId,
+              ),
+            );
+
+          await tx.auditEvent.create({
+            data: {
+              actorId,
+              action: 'identity.user_deleted',
+              targetType: 'User',
+              targetId: userId,
+              requestId,
+              metadata: {},
+            },
+          });
+          await tx.user.delete({ where: { id: userId } });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003')
+        throw new ConflictException(
+          createApiError(
+            'USER_DELETE_BLOCKED_BY_RECORDS',
+            'Akun memiliki rekam jurnal atau editorial dan harus dinonaktifkan, bukan dihapus.',
+            requestId,
+          ),
+        );
+      throw error;
+    }
     return { success: true };
   }
 }

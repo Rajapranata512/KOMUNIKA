@@ -496,6 +496,18 @@ footer {
   color: var(--color-brand);
 }
 
+.danger-button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-danger);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .form-error {
   padding: 12px 16px;
   border-left: 4px solid var(--color-danger);
@@ -574,6 +586,17 @@ footer {
 .session-list span,
 .session-list small {
   color: var(--color-ink-muted);
+}
+
+.session-list article .user-admin-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.user-admin-actions small {
+  max-width: 240px;
+  text-align: right;
 }
 
 .journal-admin-actions {
@@ -966,6 +989,20 @@ footer {
   .admin-definition-list div {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .session-list article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .session-list article .user-admin-actions {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .user-admin-actions small {
+    text-align: left;
   }
 }
 
