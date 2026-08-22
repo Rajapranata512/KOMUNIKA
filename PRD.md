@@ -1597,6 +1597,8 @@ Until approved, use neutral configurable placeholders and do not fabricate legal
 
 ## 32. Changelog
 
+- **2026-08-22:** Deployed the consolidated identity-page artifact to Vercel production, promoted the stable web alias, and verified HTTP 200 plus shared-context content on live login, password-recovery, and email-verification routes; MFA remains challenge-gated by design.
+
 - **2026-08-22:** Completed the shared identity-page visual system across login, registration, password recovery, email verification, and MFA; expanded axe and visual coverage to seven and five routes respectively; and fixed the production integration fixture to use a deterministic empty year rather than conflicting with the valid 2025 demonstration archive.
 
 - **2026-08-22:** Deployed the redesigned canonical login artifact to Vercel production, promoted the stable `aksara-nusa-global.vercel.app` alias, and verified HTTP 200 plus the new two-panel context and workspace call to action on the live route.
