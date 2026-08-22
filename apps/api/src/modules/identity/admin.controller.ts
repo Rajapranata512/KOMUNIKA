@@ -86,6 +86,20 @@ export class AdminController {
     );
   }
 
+  @Delete('users/:userId')
+  async deleteUser(
+    @Param('userId') userId: string,
+    @Headers('x-csrf-token') csrfToken: string | undefined,
+    @Req() request: RequestWithContext,
+  ) {
+    const identity = await this.auth.authenticate(sessionCookie(request));
+    if (!identity || !csrfToken || csrfToken !== cookieValue(request, 'aksara_csrf'))
+      throw new UnauthorizedException(
+        createApiError('CSRF_INVALID', 'Permintaan tidak valid.', request.requestId ?? 'unknown'),
+      );
+    return this.admin.deleteUser(identity.user.id, userId, request.requestId ?? 'unknown');
+  }
+
   @Get('overview')
   async overview(@Req() request: RequestWithContext) {
     const identity = await this.auth.authenticate(sessionCookie(request));

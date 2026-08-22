@@ -11,6 +11,7 @@ test('platform administrator can navigate the CMS workspace', async ({ page, req
   const email = 'cms-admin-' + suffix + '@example.invalid';
   const password = 'CmsAdmin2026Secure';
   let userId: string | undefined;
+  let disposableUserId: string | undefined;
 
   try {
     const registration = await request.post(apiBaseUrl + '/auth/register', {
@@ -63,12 +64,41 @@ test('platform administrator can navigate the CMS workspace', async ({ page, req
     await expect(page).toHaveURL(/\/admin\/users$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Pengguna' })).toBeVisible();
 
+    const disposableEmail = 'cms-disposable-' + suffix + '@example.invalid';
+    const disposableUser = await database.user.create({
+      data: { email: disposableEmail, passwordHash: 'browser-fixture-only' },
+    });
+    disposableUserId = disposableUser.id;
+    await page.reload();
+    const userAdministrationResults = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(
+      userAdministrationResults.violations.filter(
+        ({ impact }) => impact === 'critical' || impact === 'serious',
+      ),
+    ).toEqual([]);
+    const disposableCard = page.locator('article').filter({ hasText: disposableEmail });
+    await expect(disposableCard.getByRole('button', { name: 'Hapus akun' })).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(disposableCard.getByRole('button', { name: 'Hapus akun' })).toBeVisible();
+    await page.setViewportSize({ width: 1280, height: 720 });
+    page.once('dialog', (dialog) => dialog.accept());
+    await disposableCard.getByRole('button', { name: 'Hapus akun' }).click();
+    await expect(page).toHaveURL(/deleted=1/);
+    await expect(page.getByText('Akun pengguna berhasil dihapus.')).toBeVisible();
+    expect(await database.user.findUnique({ where: { id: disposableUser.id } })).toBeNull();
+    disposableUserId = undefined;
+
     await page.getByRole('link', { name: /Keamanan/ }).click();
     await expect(page).toHaveURL(/\/admin\/security$/);
     await expect(
       page.getByRole('heading', { level: 1, name: 'Keamanan administrator' }),
     ).toBeVisible();
   } finally {
+    if (disposableUserId) {
+      await database.user.deleteMany({ where: { id: disposableUserId } });
+    }
     if (userId) {
       await database.auditEvent.deleteMany({ where: { actorId: userId } });
       await database.user.delete({ where: { id: userId } });
